@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_university_form" model="ir.ui.view">
+        <field name="name">university.university.form</field>
+        <field name="model">university.university</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_university_student)d" type="action" class="oe_stat_button" icon="fa-users" context="{'default_university_id': id, 'search_default_university_id': id}">
+                            <field name="student_count" widget="statinfo" string="Students"/>
+                        </button>
+                        <button name="%(university.action_university_professor_main)d" type="action" class="oe_stat_button" icon="fa-user-tie" context="{'default_university_id': id, 'search_default_university_id': id}">
+                            <field name="professor_count" widget="statinfo" string="Professors"/>
+                        </button>
+                        <button name="%(action_university_enrollment)d" type="action" class="oe_stat_button" icon="fa-pencil-square-o" context="{'default_university_id': id, 'search_default_university_id': id}">
+                            <field name="enrollment_count" widget="statinfo" string="Enrollments"/>
+                        </button>
+                        <button name="%(action_university_department)d" type="action" class="oe_stat_button" icon="fa-building" context="{'default_university_id': id, 'search_default_university_id': id}">
+                            <field name="department_count" widget="statinfo" string="Departments"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                        </group>
+                        <group>
+                            <label for="street" string="Address"/>
+                            <div class="o_address_format">
+                                <field name="street" placeholder="Street..." class="o_address_street"/>
+                                <field name="city" placeholder="City" class="o_address_city"/>
+                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True}"/>
+                                <field name="zip" placeholder="ZIP" class="o_address_zip"/>
+                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_create': True}"/>
+                            </div>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Departments">
+                            <field name="department_ids"/>
+                        </page>
+                        <page string="Professors">
+                            <field name="professor_ids" mode="kanban">
+                                <kanban>
+                                    <field name="id"/>
+                                    <field name="image_128"/>
+                                    <field name="department_ids"/>
+                                    <templates>
+                                        <t t-name="card">
+                                            <div class="oe_kanban_global_click d-flex align-items-center">
+                                                <div class="o_kanban_image me-3">
+                                                    <field name="image_128" widget="image" class="o_image_64_max rounded shadow-sm"/>
+                                                </div>
+                                                <div class="oe_kanban_details">
+                                                    <strong class="o_kanban_record_title">
+                                                        <field name="name"/>
+                                                    </strong>
+                                                    <div class="text-muted">
+                                                        <field name="department_ids" widget="many2many_tags"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_university_tree" model="ir.ui.view">
+        <field name="name">university.university.tree</field>
+        <field name="model">university.university</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="city"/>
+                <field name="country_id"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_university_kanban" model="ir.ui.view">
+        <field name="name">university.university.kanban</field>
+        <field name="model">university.university</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="id"/>
+                <field name="image_128"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click d-flex align-items-center">
+                            <div class="o_kanban_image me-3">
+                                <field name="image_128" widget="image" class="o_image_64_max rounded shadow-sm"/>
+                            </div>
+                            <div class="oe_kanban_details">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                                <div class="text-muted">
+                                    <field name="city"/>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="action_university_university" model="ir.actions.act_window">
+        <field name="name">Universities</field>
+        <field name="res_model">university.university</field>
+        <field name="view_mode">list,form,kanban</field>
+    </record>
+</odoo>

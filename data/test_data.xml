@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!--University--> 
+        <record id="test_uni_tech" model="university.university">
+            <field name="name">Tech University</field>
+            <field name="city">Silicon Valley</field>
+        </record>
+        
+        <record id="test_uni_arts" model="university.university">
+            <field name="name">Arts College</field>
+            <field name="city">Paris</field>
+        </record>
+        
+        <record id="test_uni_science" model="university.university">
+            <field name="name">Science Institute</field>
+            <field name="city">Berlin</field>
+        </record>
+
+        <!-- Departments -->
+        <record id="test_dept_cs" model="university.department">
+            <field name="name">Computer Science</field>
+            <field name="university_id" ref="test_uni_tech"/>
+        </record>
+        
+        <record id="test_dept_math" model="university.department">
+            <field name="name">Mathematics</field>
+            <field name="university_id" ref="test_uni_tech"/>
+        </record>
+
+        <record id="test_dept_lit" model="university.department">
+            <field name="name">Literature</field>
+            <field name="university_id" ref="test_uni_arts"/>
+        </record>
+        
+        <record id="test_dept_phys" model="university.department">
+            <field name="name">Physics</field>
+            <field name="university_id" ref="test_uni_science"/>
+        </record>
+
+        <!-- Professors -->
+        <record id="test_prof_knuth" model="university.professor">
+            <field name="name">Donald Knuth</field>
+            <field name="university_id" ref="test_uni_tech"/>
+            <field name="department_ids" eval="[(4, ref('test_dept_cs'))]"/>
+        </record>
+
+        <record id="test_prof_lovelace" model="university.professor">
+            <field name="name">Ada Lovelace</field>
+            <field name="university_id" ref="test_uni_tech"/>
+            <field name="department_ids" eval="[(4, ref('test_dept_cs')), (4, ref('test_dept_math'))]"/>
+        </record>
+
+        <record id="test_prof_shakespeare" model="university.professor">
+            <field name="name">William Shakespeare</field>
+            <field name="university_id" ref="test_uni_arts"/>
+            <field name="department_ids" eval="[(4, ref('test_dept_lit'))]"/>
+        </record>
+        
+        <record id="test_prof_einstein" model="university.professor">
+            <field name="name">Albert Einstein</field>
+            <field name="university_id" ref="test_uni_science"/>
+            <field name="department_ids" eval="[(4, ref('test_dept_phys'))]"/>
+        </record>
+
+        <!-- Students -->
+        <record id="test_student_john" model="university.student">
+            <field name="name">John Doe</field>
+            <field name="university_id" ref="test_uni_tech"/>
+        </record>
+        
+        <record id="test_student_jane" model="university.student">
+            <field name="name">Jane Smith</field>
+            <field name="university_id" ref="test_uni_tech"/>
+        </record>
+        
+        <record id="test_student_emily" model="university.student">
+            <field name="name">Emily Bronte</field>
+            <field name="university_id" ref="test_uni_arts"/>
+        </record>
+        
+        <record id="test_student_marie" model="university.student">
+            <field name="name">Marie Curie</field>
+            <field name="university_id" ref="test_uni_science"/>
+        </record>
+
+        <!-- Subjects -->
+        <record id="test_subject_algo_adv" model="university.subject">
+            <field name="name">Advanced Algorithms</field>
+            <field name="code">CS201</field>
+            <field name="department_id" ref="test_dept_cs"/>
+            <field name="professor_ids" eval="[(4, ref('test_prof_knuth'))]"/>
+        </record>
+
+        <record id="test_subject_calc" model="university.subject">
+            <field name="name">Calculus I</field>
+            <field name="code">MATH101</field>
+            <field name="department_id" ref="test_dept_math"/>
+            <field name="professor_ids" eval="[(4, ref('test_prof_lovelace'))]"/>
+        </record>
+        
+        <record id="test_subject_poetry" model="university.subject">
+            <field name="name">English Poetry</field>
+            <field name="code">LIT101</field>
+            <field name="department_id" ref="test_dept_lit"/>
+            <field name="professor_ids" eval="[(4, ref('test_prof_shakespeare'))]"/>
+        </record>
+
+        <record id="test_subject_relativity" model="university.subject">
+            <field name="name">General Relativity</field>
+            <field name="code">PHYS301</field>
+            <field name="department_id" ref="test_dept_phys"/>
+            <field name="professor_ids" eval="[(4, ref('test_prof_einstein'))]"/>
+        </record>
+
+        <!-- Enrollments & Grades -->
+        <!-- John Doe in Algorithms -->
+        <record id="test_enroll_john_algo" model="university.enrollment">
+            <field name="student_id" ref="test_student_john"/>
+            <field name="university_id" ref="test_uni_tech"/>
+            <field name="subject_id" ref="test_subject_algo_adv"/>
+            <field name="professor_id" ref="test_prof_knuth"/>
+        </record>
+        <record id="test_grade_john_algo" model="university.grade">
+            <field name="enrollment_id" ref="test_enroll_john_algo"/>
+            <field name="score">8.5</field>
+        </record>
+
+        <!-- Jane Smith in Algorithms -->
+        <record id="test_enroll_jane_algo" model="university.enrollment">
+            <field name="student_id" ref="test_student_jane"/>
+            <field name="university_id" ref="test_uni_tech"/>
+            <field name="subject_id" ref="test_subject_algo_adv"/>
+            <field name="professor_id" ref="test_prof_knuth"/>
+        </record>
+         <record id="test_grade_jane_algo" model="university.grade">
+            <field name="enrollment_id" ref="test_enroll_jane_algo"/>
+            <field name="score">9.2</field>
+        </record>
+
+        <!-- Jane Smith in Calculus -->
+        <record id="test_enroll_jane_calc" model="university.enrollment">
+            <field name="student_id" ref="test_student_jane"/>
+            <field name="university_id" ref="test_uni_tech"/>
+            <field name="subject_id" ref="test_subject_calc"/>
+            <field name="professor_id" ref="test_prof_lovelace"/>
+        </record>
+         <record id="test_grade_jane_calc" model="university.grade">
+            <field name="enrollment_id" ref="test_enroll_jane_calc"/>
+            <field name="score">7.8</field>
+        </record>
+
+        <!-- Emily in Poetry -->
+        <record id="test_enroll_emily_poetry" model="university.enrollment">
+            <field name="student_id" ref="test_student_emily"/>
+            <field name="university_id" ref="test_uni_arts"/>
+            <field name="subject_id" ref="test_subject_poetry"/>
+            <field name="professor_id" ref="test_prof_shakespeare"/>
+        </record>
+        <record id="test_grade_emily_poetry" model="university.grade">
+            <field name="enrollment_id" ref="test_enroll_emily_poetry"/>
+            <field name="score">10.0</field>
+        </record>
+
+        <!-- Marie in Relativity -->
+        <record id="test_enroll_marie_rel" model="university.enrollment">
+            <field name="student_id" ref="test_student_marie"/>
+            <field name="university_id" ref="test_uni_science"/>
+            <field name="subject_id" ref="test_subject_relativity"/>
+            <field name="professor_id" ref="test_prof_einstein"/>
+        </record>
+         <record id="test_grade_marie_rel" model="university.grade">
+            <field name="enrollment_id" ref="test_enroll_marie_rel"/>
+            <field name="score">9.5</field>
+        </record>
+
+    </data>
+</odoo>

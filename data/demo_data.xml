@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+        <!-- Universities -->
+        <record id="demo_uni_1" model="university.university">
+            <field name="name">Universidad Complutense</field>
+            <field name="city">Madrid</field>
+        </record>
+        
+        <record id="demo_uni_2" model="university.university">
+            <field name="name">MIT</field>
+            <field name="city">Cambridge</field>
+        </record>
+
+        <!-- Departments -->
+        <record id="demo_dept_cs" model="university.department">
+            <field name="name">Computer Science</field>
+            <field name="university_id" ref="demo_uni_1"/>
+        </record>
+
+        <record id="demo_dept_phys" model="university.department">
+            <field name="name">Physics</field>
+            <field name="university_id" ref="demo_uni_2"/>
+        </record>
+
+        <!-- Professors -->
+        <record id="demo_prof_turing" model="university.professor">
+            <field name="name">Alan Turing</field>
+            <field name="university_id" ref="demo_uni_1"/>
+            <field name="department_ids" eval="[(4, ref('demo_dept_cs'))]"/>
+        </record>
+
+        <record id="demo_prof_feynman" model="university.professor">
+            <field name="name">Richard Feynman</field>
+            <field name="university_id" ref="demo_uni_2"/>
+            <field name="department_ids" eval="[(4, ref('demo_dept_phys'))]"/>
+        </record>
+
+        <!-- Students -->
+        <record id="demo_student_alice" model="university.student">
+            <field name="name">Alice Wonderland</field>
+            <field name="university_id" ref="demo_uni_1"/>
+        </record>
+
+        <record id="demo_student_bob" model="university.student">
+            <field name="name">Bob Builder</field>
+            <field name="university_id" ref="demo_uni_2"/>
+        </record>
+
+        <!-- Subjects -->
+        <record id="demo_subject_algo" model="university.subject">
+            <field name="name">Algorithms</field>
+            <field name="code">CS101</field>
+            <field name="department_id" ref="demo_dept_cs"/>
+            <field name="professor_ids" eval="[(4, ref('demo_prof_turing'))]"/>
+        </record>
+
+         <record id="demo_subject_qm" model="university.subject">
+            <field name="name">Quantum Mechanics</field>
+            <field name="code">PHYS202</field>
+            <field name="department_id" ref="demo_dept_phys"/>
+            <field name="professor_ids" eval="[(4, ref('demo_prof_feynman'))]"/>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="action_report_student" model="ir.actions.report">
+        <field name="name">Student Report</field>
+        <field name="model">university.student</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">university.report_student</field>
+        <field name="report_file">university.report_student</field>
+        <field name="print_report_name">'Student Report - %s' % (object.name)</field>
+        <field name="binding_model_id" ref="university.model_university_student"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_student">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <div class="oe_structure"/>
+                        
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h2 class="text-center mb-4">Student Academic Report</h2>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <strong>Student Information</strong>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <div class="mb-1"><strong>Name: </strong><span t-field="o.name"/></div>
+                                        <div class="mb-1"><strong>Address: </strong>
+                                            <span t-if="o.street" t-field="o.street"/>
+                                            <span t-if="o.city" t-field="o.city"/>
+                                            <span t-if="o.zip" t-field="o.zip"/>
+                                            <span t-if="o.state_id" t-field="o.state_id.name"/>
+                                            <span t-if="o.country_id" t-field="o.country_id.name"/>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <strong>Academic Details</strong>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <div class="mb-1"><strong>University: </strong><span t-field="o.university_id.name"/></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4 class="mt-4 mb-3 border-bottom pb-2">Academic Summary</h4>
+                        <table class="table table-sm table-striped table-bordered">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th style="width: 40%;">Subject</th>
+                                    <th style="width: 40%;">Professor</th>
+                                    <th class="text-center" style="width: 20%;">Average Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.enrollment_ids" t-as="enrollment">
+                                    <td><span t-field="enrollment.subject_id.name"/></td>
+                                    <td><span t-field="enrollment.professor_id.name"/></td>
+                                    <td class="text-center">
+                                        <t t-set="grade_count" t-value="len(enrollment.grade_ids)"/>
+                                        <t t-set="grade_sum" t-value="sum(grade.score for grade in enrollment.grade_ids)"/>
+                                        <t t-if="grade_count &gt; 0">
+                                            <t t-set="avg_score" t-value="grade_sum / grade_count"/>
+                                            <span t-att-class="'text-success font-weight-bold' if avg_score >= 5 else 'text-danger font-weight-bold'">
+                                                <t t-esc="round(avg_score, 2)"/>
+                                            </span>
+                                        </t>
+                                        <span t-else="" class="text-muted">N/A</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <!-- Complete History Table -->
+                        <h4 class="mt-5 mb-3 border-bottom pb-2">Complete Grade History</h4>
+                        <table class="table table-sm table-hover">
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th style="width: 15%;">Date</th>
+                                    <th style="width: 35%;">Subject</th>
+                                    <th style="width: 35%;">Professor</th>
+                                    <th class="text-center" style="width: 15%;">Score</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.grade_ids.sorted(key=lambda g: g.date or '', reverse=True)" t-as="grade">
+                                    <td><span t-field="grade.date"/></td>
+                                    <td><span t-field="grade.enrollment_id.subject_id.name"/></td>
+                                    <td><span t-field="grade.enrollment_id.professor_id.name"/></td>
+                                    <td class="text-center">
+                                        <span t-att-class="'badge badge-success' if grade.score >= 5 else 'badge badge-danger'">
+                                            <span t-field="grade.score"/>
+                                        </span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="row mt-5">
+                            <div class="col-12 text-center text-muted">
+                                <small>Report generated on <span t-esc="context_timestamp(datetime.datetime.now()).strftime('%Y-%m-%d %H:%M')"/></small>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

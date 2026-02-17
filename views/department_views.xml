@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_department_form" model="ir.ui.view">
+        <field name="name">university.department.form</field>
+        <field name="model">university.department</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <div class="oe_button_box" name="button_box">
+                         <button name="action_view_professors" type="object" class="oe_stat_button" icon="fa-user-tie">
+                            <field name="professor_count" widget="statinfo" string="Professors"/>
+                        </button>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="university_id"/>
+                        </group>
+                        <group>
+                            <field name="manager_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Professors">
+                            <field name="professor_ids" mode="kanban">
+                                <kanban>
+                                    <field name="id"/>
+                                    <field name="image_128"/>
+                                    <templates>
+                                        <t t-name="card">
+                                            <div class="oe_kanban_global_click d-flex align-items-center">
+                                                <div class="o_kanban_image me-3">
+                                                    <field name="image_128" widget="image" class="o_image_64_max rounded shadow-sm"/>
+                                                </div>
+                                                <div class="oe_kanban_details">
+                                                    <strong class="o_kanban_record_title">
+                                                        <field name="name"/>
+                                                    </strong>
+                                                </div>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_department_tree" model="ir.ui.view">
+        <field name="name">university.department.tree</field>
+        <field name="model">university.department</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="name"/>
+                <field name="university_id"/>
+                <field name="manager_id"/>
+            </list>
+        </field>
+    </record>
+
+     <record id="view_department_kanban" model="ir.ui.view">
+        <field name="name">university.department.kanban</field>
+        <field name="model">university.department</field>
+        <field name="arch" type="xml">
+            <kanban>
+                <field name="name"/>
+                <field name="university_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <div class="o_kanban_record_top">
+                                <strong class="o_kanban_record_title">
+                                    <field name="name"/>
+                                </strong>
+                            </div>
+                            <div class="o_kanban_record_body">
+                                <field name="university_id"/>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_department_search" model="ir.ui.view">
+        <field name="name">university.department.search</field>
+        <field name="model">university.department</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="university_id"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_university_department" model="ir.actions.act_window">
+        <field name="name">Departments</field>
+        <field name="res_model">university.department</field>
+        <field name="view_mode">list,form,kanban</field>
+    </record>
+</odoo>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <menuitem id="menu_university_root" name="University" web_icon="university,static/description/icon.png"/>
+
+    <!-- Academic Menu -->
+    <menuitem id="menu_university_academic" name="Academic" parent="menu_university_root" sequence="10"/>
+    <menuitem id="menu_university_university" name="Universities" parent="menu_university_academic" action="action_university_university" sequence="10"/>
+    <menuitem id="menu_university_department" name="Departments" parent="menu_university_academic" action="action_university_department" sequence="20"/>
+    <menuitem id="menu_university_subject" name="Subjects" parent="menu_university_academic" action="action_university_subject" sequence="30"/>
+
+    <!-- People Menu -->
+    <menuitem id="menu_university_people" name="People" parent="menu_university_root" sequence="20"/>
+    <menuitem id="menu_university_professor" name="Professors" parent="menu_university_people" action="action_university_professor_main" sequence="10"/>
+    <menuitem id="menu_university_student" name="Students" parent="menu_university_people" action="action_university_student" sequence="20"/>
+
+    <!-- Operations Menu -->
+    <menuitem id="menu_university_operations" name="Operations" parent="menu_university_root" sequence="30"/>
+    <menuitem id="menu_university_enrollment" name="Enrollments" parent="menu_university_operations" action="action_university_enrollment" sequence="10"/>
+    <menuitem id="menu_university_grade" name="Grades" parent="menu_university_operations" action="action_university_grade" sequence="20"/>
+
+    <!-- Reports Menu -->
+    <menuitem id="menu_university_reporting" name="Reports" parent="menu_university_root" sequence="40"/>
+    <menuitem id="menu_university_report_grades" name="Grade Analysis" parent="menu_university_reporting" action="action_university_report" sequence="10"/>
+</odoo>
