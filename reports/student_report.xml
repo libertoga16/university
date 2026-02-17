@@ -35,7 +35,7 @@
                                         <div class="mb-1"><strong>Address: </strong>
                                             <span t-if="o.street" t-field="o.street"/>
                                             <span t-if="o.city" t-field="o.city"/>
-                                            <span t-if="o.zip" t-field="o.zip"/>
+                                            <span t-if="o.zip_code" t-field="o.zip_code"/>
                                             <span t-if="o.state_id" t-field="o.state_id.name"/>
                                             <span t-if="o.country_id" t-field="o.country_id.name"/>
                                         </div>

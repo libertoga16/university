@@ -1,4 +1,6 @@
+from . import mixins
 from . import university
+
 from . import department
 from . import professor
 from . import subject

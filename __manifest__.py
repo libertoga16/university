@@ -14,9 +14,10 @@
     """,
     'category': 'Education',
     'author': 'Liberto',
-    'depends': ['base'],
+    'depends': ['base', 'mail'],
     'data': [
         'security/ir.model.access.csv',
+        'data/mail_template_data.xml',
         'views/grade_views.xml',
         'views/enrollment_views.xml',
         'views/subject_views.xml',

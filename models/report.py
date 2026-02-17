@@ -1,19 +1,67 @@
-from odoo import models, fields, tools
+import logging
+from typing import Any, Dict, List, Optional
+
+from odoo import models, fields, tools, api
+
+_logger = logging.getLogger(__name__)
+
 
 class UniversityReport(models.Model):
+    """
+    Architectural entity representing a University Report (SQL View).
+    
+    A read-only aggregated view of student performance, flattening the
+    relational structure for efficient reporting and analysis.
+    """
     _name = 'university.report'
     _description = 'University Report'
     _auto = False
     _rec_name = 'student_id'
 
-    university_id = fields.Many2one('university.university', string='University', readonly=True)
-    professor_id = fields.Many2one('university.professor', string='Professor', readonly=True)
-    department_id = fields.Many2one('university.department', string='Department', readonly=True)
-    student_id = fields.Many2one('university.student', string='Student', readonly=True)
-    subject_id = fields.Many2one('university.subject', string='Subject', readonly=True)
-    score = fields.Float(string='Score', readonly=True, aggregator='avg')
+    # === DIMENSIONS (GROUP BY) ===
+    university_id = fields.Many2one(
+        comodel_name='university.university',
+        string='University',
+        readonly=True,
+        help="University dimension."
+    )
+    professor_id = fields.Many2one(
+        comodel_name='university.professor',
+        string='Professor',
+        readonly=True,
+        help="Professor dimension."
+    )
+    department_id = fields.Many2one(
+        comodel_name='university.department',
+        string='Department',
+        readonly=True,
+        help="Department dimension."
+    )
+    student_id = fields.Many2one(
+        comodel_name='university.student',
+        string='Student',
+        readonly=True,
+        help="Student dimension."
+    )
+    subject_id = fields.Many2one(
+        comodel_name='university.subject',
+        string='Subject',
+        readonly=True,
+        help="Subject dimension."
+    )
 
-    def init(self):
+    # === MEASURES (AGGREGATES) ===
+    score = fields.Float(
+        string='Score',
+        readonly=True,
+        group_operator='avg',
+        help="Average score."
+    )
+
+    def init(self) -> None:
+        """
+        Initialize the SQL view.
+        """
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
