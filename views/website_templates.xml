@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- UNIVERSITY LIST TEMPLATE -->
+    <template id="university_list" name="University List">
+        <t t-call="website.layout">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 text-center mt-4">
+                        <h1>University List</h1>
+                    </div>
+                </div>
+                <div class="row mt-4">
+                    <t t-foreach="universities" t-as="uni">
+                        <div class="col-md-4 mb-4">
+                            <div class="card h-100 shadow-sm">
+                                <span t-if="uni.image_1920" t-field="uni.image_1920" t-options="{'widget': 'image', 'preview_image': 'image_512'}" class="card-img-top p-3" style="max-height: 200px; object-fit: contain;"/>
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <a t-attf-href="/university/{{uni.id}}" class="text-decoration-none text-dark">
+                                            <t t-esc="uni.name"/>
+                                        </a>
+                                    </h5>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- PROFESSOR LIST TEMPLATE -->
+    <template id="university_professor_list" name="Professor List">
+        <t t-call="website.layout">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12 text-center mt-4 mb-4">
+                        <h1>Professors at <t t-esc="university.name"/></h1>
+                        <a href="/university" class="btn btn-secondary mt-2">Back to Universities</a>
+                    </div>
+                </div>
+                <div class="row">
+                    <t t-foreach="professors" t-as="prof">
+                        <div class="col-md-3 mb-4">
+                            <div class="card h-100 shadow-sm border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <span t-if="prof.image_1920" t-field="prof.image_1920" t-options="{'widget': 'image', 'class': 'rounded-circle mb-3', 'style': 'width: 120px; height: 120px; object-fit: cover;'}" />
+                                    <h5 class="card-title text-primary"><t t-esc="prof.name"/></h5>
+                                    
+                                    <div class="mb-2">
+                                        <t t-foreach="prof.department_ids" t-as="dept">
+                                            <span class="badge bg-info text-dark me-1"><t t-esc="dept.name"/></span>
+                                        </t>
+                                    </div>
+
+                                    <div class="text-start mt-3 px-2">
+                                        <strong class="d-block text-muted small text-uppercase">Subjects:</strong>
+                                        <ul class="list-unstyled small mb-0">
+                                            <t t-foreach="prof.subject_ids" t-as="subject">
+                                                <li><i class="fa fa-book me-2 text-secondary"></i><t t-esc="subject.name"/></li>
+                                            </t>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </div>
+                <div class="row" t-if="not professors">
+                    <div class="col-12 text-center">
+                         <div class="alert alert-info">No professors found for this university.</div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

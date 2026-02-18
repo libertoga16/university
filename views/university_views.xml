@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_university_form" model="ir.ui.view">
-        <field name="name">university.university.form</field>
+    <!-- FORM VIEW -->
+    <record id="university_university_view_form" model="ir.ui.view">
+        <field name="name">university.university.view.form</field>
         <field name="model">university.university</field>
         <field name="arch" type="xml">
             <form>
@@ -11,7 +12,7 @@
                         <button name="%(action_university_student)d" type="action" class="oe_stat_button" icon="fa-users" context="{'default_university_id': id, 'search_default_university_id': id}">
                             <field name="student_count" widget="statinfo" string="Students"/>
                         </button>
-                        <button name="%(university.action_university_professor_main)d" type="action" class="oe_stat_button" icon="fa-user-tie" context="{'default_university_id': id, 'search_default_university_id': id}">
+                        <button name="%(action_university_professor)d" type="action" class="oe_stat_button" icon="fa-user-tie" context="{'default_university_id': id, 'search_default_university_id': id}">
                             <field name="professor_count" widget="statinfo" string="Professors"/>
                         </button>
                         <button name="%(action_university_enrollment)d" type="action" class="oe_stat_button" icon="fa-pencil-square-o" context="{'default_university_id': id, 'search_default_university_id': id}">
@@ -22,10 +23,10 @@
                         </button>
                     </div>
                     <group>
-                        <group>
+                        <group name="main_info">
                             <field name="name"/>
                         </group>
-                        <group>
+                        <group name="address_info">
                             <label for="street" string="Address"/>
                             <div class="o_address_format">
                                 <field name="street" placeholder="Street..." class="o_address_street"/>
@@ -37,10 +38,10 @@
                         </group>
                     </group>
                     <notebook>
-                        <page string="Departments">
+                        <page string="Departments" name="departments">
                             <field name="department_ids"/>
                         </page>
-                        <page string="Professors">
+                        <page string="Professors" name="professors">
                             <field name="professor_ids" mode="kanban">
                                 <kanban>
                                     <field name="id"/>
@@ -72,8 +73,9 @@
         </field>
     </record>
 
-    <record id="view_university_tree" model="ir.ui.view">
-        <field name="name">university.university.tree</field>
+    <!-- LIST VIEW -->
+    <record id="university_university_view_list" model="ir.ui.view">
+        <field name="name">university.university.view.list</field>
         <field name="model">university.university</field>
         <field name="arch" type="xml">
             <list>
@@ -84,8 +86,9 @@
         </field>
     </record>
 
-    <record id="view_university_kanban" model="ir.ui.view">
-        <field name="name">university.university.kanban</field>
+    <!-- KANBAN VIEW -->
+    <record id="university_university_view_kanban" model="ir.ui.view">
+        <field name="name">university.university.view.kanban</field>
         <field name="model">university.university</field>
         <field name="arch" type="xml">
             <kanban>
@@ -112,6 +115,20 @@
         </field>
     </record>
 
+    <!-- SEARCH VIEW -->
+    <record id="university_university_view_search" model="ir.ui.view">
+        <field name="name">university.university.view.search</field>
+        <field name="model">university.university</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="city"/>
+                <field name="country_id"/>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
     <record id="action_university_university" model="ir.actions.act_window">
         <field name="name">Universities</field>
         <field name="res_model">university.university</field>

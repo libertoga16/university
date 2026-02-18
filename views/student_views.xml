@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_student_form" model="ir.ui.view">
-        <field name="name">university.student.form</field>
+    <!-- FORM VIEW -->
+    <record id="university_student_view_form" model="ir.ui.view">
+        <field name="name">university.student.view.form</field>
         <field name="model">university.student</field>
         <field name="arch" type="xml">
             <form>
                 <header>
                     <button name="action_send_email" string="Send by Email" type="object" class="oe_highlight"/>
-                    <button name="%(university.action_report_student)d" string="Print Report" type="action"/>
+                    <button name="%(action_university_report)d" string="Print Report" type="action"/>
                 </header>
                 <sheet>
                     <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
@@ -20,13 +21,15 @@
                         </button>
                     </div>
                     <group>
-                        <group>
+                        <group name="personal_info">
                             <field name="name"/>
                             <field name="email" widget="email"/>
+                        </group>
+                        <group name="academic_info">
                             <field name="university_id"/>
                             <field name="tutor_id"/>
                         </group>
-                        <group>
+                        <group name="address_info">
                              <label for="street" string="Address"/>
                             <div class="o_address_format">
                                 <field name="street" placeholder="Street..." class="o_address_street"/>
@@ -47,8 +50,9 @@
         </field>
     </record>
 
-    <record id="view_student_tree" model="ir.ui.view">
-        <field name="name">university.student.tree</field>
+    <!-- LIST VIEW -->
+    <record id="university_student_view_list" model="ir.ui.view">
+        <field name="name">university.student.view.list</field>
         <field name="model">university.student</field>
         <field name="arch" type="xml">
             <list>
@@ -59,8 +63,9 @@
         </field>
     </record>
 
-     <record id="view_student_kanban" model="ir.ui.view">
-        <field name="name">university.student.kanban</field>
+     <!-- KANBAN VIEW -->
+     <record id="university_student_view_kanban" model="ir.ui.view">
+        <field name="name">university.student.view.kanban</field>
         <field name="model">university.student</field>
         <field name="arch" type="xml">
             <kanban>
@@ -87,17 +92,20 @@
         </field>
     </record>
     
-    <record id="view_student_search" model="ir.ui.view">
-        <field name="name">university.student.search</field>
+    <!-- SEARCH VIEW -->
+    <record id="university_student_view_search" model="ir.ui.view">
+        <field name="name">university.student.view.search</field>
         <field name="model">university.student</field>
         <field name="arch" type="xml">
             <search>
                 <field name="name"/>
                 <field name="university_id"/>
+                <filter string="University" name="group_university" context="{'group_by':'university_id'}"/>
             </search>
         </field>
     </record>
 
+    <!-- ACTION -->
     <record id="action_university_student" model="ir.actions.act_window">
         <field name="name">Students</field>
         <field name="res_model">university.student</field>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="university_enrollment_wizard_view_form" model="ir.ui.view">
+        <field name="name">university.enrollment.wizard.view.form</field>
+        <field name="model">university.enrollment.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Batch Enrollment">
+                <group>
+                    <group name="context">
+                        <field name="university_id"/>
+                        <field name="subject_id"/>
+                        <field name="professor_id"/>
+                    </group>
+                    <group name="students">
+                         <field name="student_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button name="action_enroll" string="Enroll Students" type="object" class="btn-primary"/>
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_university_enrollment_wizard" model="ir.actions.act_window">
+        <field name="name">Enroll Students</field>
+        <field name="res_model">university.enrollment.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+
+</odoo>

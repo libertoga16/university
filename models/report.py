@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 class UniversityReport(models.Model):
     """
     Architectural entity representing a University Report (SQL View).
-    
+
     A read-only aggregated view of student performance, flattening the
     relational structure for efficient reporting and analysis.
     """
@@ -54,7 +54,7 @@ class UniversityReport(models.Model):
     score = fields.Float(
         string='Score',
         readonly=True,
-        group_operator='avg',
+        aggregator='avg',
         help="Average score."
     )
 

@@ -9,7 +9,7 @@ _logger = logging.getLogger(__name__)
 class University(models.Model):
     """
     Architectural entity representing a University.
-    
+
     Acts as the top-level container for all academic entities (departments, professors,
     students). It provides aggregate statistics and navigation to related sub-entities.
     """
@@ -35,20 +35,21 @@ class University(models.Model):
         index=True,
         help="City."
     )
-    state_id = fields.Many2one(#esto no funciona correctamente
+    country_id = fields.Many2one(
+        comodel_name='res.country',
+        string='Country',
+        help="Country."
+    )
+    state_id = fields.Many2one(
         comodel_name='res.country.state',
         string='State',
+        # Architectural Fix: Explicit domain dependency on country_id
         domain="[('country_id', '=', country_id)]",
         help="State or province."
     )
     zip_code = fields.Char(
         string='Zip Code',
         help="Postal code."
-    )
-    country_id = fields.Many2one(
-        comodel_name='res.country',
-        string='Country',
-        help="Country."
     )
 
     # === RELATIONAL FIELDS ===

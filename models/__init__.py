@@ -1,10 +1,5 @@
-from . import mixins
+from . import base_mixins
 from . import university
-
-from . import department
-from . import professor
-from . import subject
-from . import student
-from . import enrollment
-from . import grade
+from . import academic_entities
+from . import academic_operations
 from . import report

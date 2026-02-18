@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_enrollment_form" model="ir.ui.view">
-        <field name="name">university.enrollment.form</field>
+    <!-- FORM VIEW -->
+    <record id="university_enrollment_view_form" model="ir.ui.view">
+        <field name="name">university.enrollment.view.form</field>
         <field name="model">university.enrollment</field>
         <field name="arch" type="xml">
             <form>
@@ -12,17 +13,17 @@
                         </h1>
                     </div>
                     <group>
-                        <group>
+                        <group name="main_info">
                             <field name="student_id"/>
                             <field name="subject_id"/>
                         </group>
-                        <group>
+                        <group name="org_info">
                             <field name="university_id"/>
                             <field name="professor_id"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Grades">
+                        <page string="Grades" name="grades">
                             <field name="grade_ids">
                                 <list editable="bottom">
                                     <field name="score"/>
@@ -35,8 +36,9 @@
         </field>
     </record>
 
-    <record id="view_enrollment_tree" model="ir.ui.view">
-        <field name="name">university.enrollment.tree</field>
+    <!-- LIST VIEW -->
+    <record id="university_enrollment_view_list" model="ir.ui.view">
+        <field name="name">university.enrollment.view.list</field>
         <field name="model">university.enrollment</field>
         <field name="arch" type="xml">
             <list>
@@ -48,13 +50,15 @@
         </field>
     </record>
     
-    <record id="view_enrollment_kanban" model="ir.ui.view">
-        <field name="name">university.enrollment.kanban</field>
+    <!-- KANBAN VIEW -->
+    <record id="university_enrollment_view_kanban" model="ir.ui.view">
+        <field name="name">university.enrollment.view.kanban</field>
         <field name="model">university.enrollment</field>
         <field name="arch" type="xml">
             <kanban>
                 <field name="code"/>
-                
+                <field name="student_id"/>
+                <field name="subject_id"/>
                 <templates>
                     <t t-name="card">
                         <div class="oe_kanban_global_click">
@@ -70,23 +74,25 @@
                         </div>
                     </t>
                 </templates>
-                
             </kanban>
         </field>
     </record>
 
-     <record id="view_enrollment_search" model="ir.ui.view">
-        <field name="name">university.enrollment.search</field>
+    <!-- SEARCH VIEW -->
+     <record id="university_enrollment_view_search" model="ir.ui.view">
+        <field name="name">university.enrollment.view.search</field>
         <field name="model">university.enrollment</field>
         <field name="arch" type="xml">
             <search>
                 <field name="code"/>
                 <field name="student_id"/>
                 <field name="university_id"/>
+                <filter string="University" name="group_university" context="{'group_by':'university_id'}"/>
             </search>
         </field>
     </record>
 
+    <!-- ACTION -->
     <record id="action_university_enrollment" model="ir.actions.act_window">
         <field name="name">Enrollments</field>
         <field name="res_model">university.enrollment</field>

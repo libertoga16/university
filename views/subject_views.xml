@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_subject_form" model="ir.ui.view">
-        <field name="name">university.subject.form</field>
+    <!-- FORM VIEW -->
+    <record id="university_subject_view_form" model="ir.ui.view">
+        <field name="name">university.subject.view.form</field>
         <field name="model">university.subject</field>
         <field name="arch" type="xml">
             <form>
@@ -12,15 +13,17 @@
                         </button>
                     </div>
                     <group>
-                        <group>
+                        <group name="main_info">
                             <field name="name"/>
                             <field name="code"/>
+                        </group>
+                        <group name="org_info">
                             <field name="department_id"/>
                             <field name="university_id"/>
                         </group>
                     </group>
                     <notebook>
-                        <page string="Professors">
+                        <page string="Professors" name="professors">
                             <field name="professor_ids"/>
                         </page>
                     </notebook>
@@ -29,8 +32,9 @@
         </field>
     </record>
 
-    <record id="view_subject_tree" model="ir.ui.view">
-        <field name="name">university.subject.tree</field>
+    <!-- LIST VIEW -->
+    <record id="university_subject_view_list" model="ir.ui.view">
+        <field name="name">university.subject.view.list</field>
         <field name="model">university.subject</field>
         <field name="arch" type="xml">
             <list>
@@ -42,13 +46,14 @@
         </field>
     </record>
 
-    <record id="view_subject_kanban" model="ir.ui.view">
-        <field name="name">university.subject.kanban</field>
+    <!-- KANBAN VIEW -->
+    <record id="university_subject_view_kanban" model="ir.ui.view">
+        <field name="name">university.subject.view.kanban</field>
         <field name="model">university.subject</field>
         <field name="arch" type="xml">
             <kanban>
                 <field name="name"/>
-                
+                <field name="university_id"/>
                 <templates>
                     <t t-name="card">
                         <div class="oe_kanban_global_click">
@@ -63,13 +68,13 @@
                         </div>
                     </t>
                 </templates>
-                
             </kanban>
         </field>
     </record>
 
-     <record id="view_subject_search" model="ir.ui.view">
-        <field name="name">university.subject.search</field>
+     <!-- SEARCH VIEW -->
+     <record id="university_subject_view_search" model="ir.ui.view">
+        <field name="name">university.subject.view.search</field>
         <field name="model">university.subject</field>
         <field name="arch" type="xml">
             <search>
@@ -77,10 +82,13 @@
                 <field name="code"/>
                 <field name="department_id"/>
                 <field name="university_id"/>
+                <filter string="University" name="group_university" context="{'group_by':'university_id'}"/>
+                <filter string="Department" name="group_department" context="{'group_by':'department_id'}"/>
             </search>
         </field>
     </record>
 
+    <!-- ACTION -->
     <record id="action_university_subject" model="ir.actions.act_window">
         <field name="name">Subjects</field>
         <field name="res_model">university.subject</field>

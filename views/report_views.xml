@@ -1,50 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <record id="view_university_report_pivot" model="ir.ui.view">
-        <field name="name">university.report.pivot</field>
+    <!-- PIVOT VIEW -->
+    <record id="university_report_view_pivot" model="ir.ui.view">
+        <field name="name">university.report.view.pivot</field>
         <field name="model">university.report</field>
         <field name="arch" type="xml">
-            <pivot string="Grades Analysis" disable_linking="True">
-                <field name="university_id" type="col"/>
+            <pivot string="Academic Report" disable_linking="True">
+                <field name="university_id" type="row"/>
                 <field name="student_id" type="row"/>
                 <field name="score" type="measure"/>
             </pivot>
         </field>
     </record>
 
-    <record id="view_university_report_graph" model="ir.ui.view">
-        <field name="name">university.report.graph</field>
+    <!-- GRAPH VIEW -->
+    <record id="university_report_view_graph" model="ir.ui.view">
+        <field name="name">university.report.view.graph</field>
         <field name="model">university.report</field>
         <field name="arch" type="xml">
-            <graph string="Grades Analysis" type="bar">
-                <field name="student_id"/>
+            <graph string="Academic Report" type="bar">
+                <field name="university_id"/>
                 <field name="score" type="measure"/>
             </graph>
         </field>
     </record>
 
-    <record id="view_university_report_search" model="ir.ui.view">
-        <field name="name">university.report.search</field>
+    <!-- SEARCH VIEW -->
+    <record id="university_report_view_search" model="ir.ui.view">
+        <field name="name">university.report.view.search</field>
         <field name="model">university.report</field>
         <field name="arch" type="xml">
             <search>
-                <field name="university_id"/>
                 <field name="student_id"/>
+                <field name="university_id"/>
+                <field name="department_id"/>
                 <field name="professor_id"/>
                 <field name="subject_id"/>
-                <separator/>
                 <filter string="University" name="group_university" context="{'group_by':'university_id'}"/>
-                <filter string="Student" name="group_student" context="{'group_by':'student_id'}"/>
+                <filter string="Department" name="group_department" context="{'group_by':'department_id'}"/>
                 <filter string="Professor" name="group_professor" context="{'group_by':'professor_id'}"/>
                 <filter string="Subject" name="group_subject" context="{'group_by':'subject_id'}"/>
             </search>
         </field>
     </record>
 
+    <!-- ACTION -->
     <record id="action_university_report" model="ir.actions.act_window">
-        <field name="name">Grade Reports</field>
+        <field name="name">Academic Reports</field>
         <field name="res_model">university.report</field>
         <field name="view_mode">pivot,graph</field>
-        <field name="context">{'pivot_measures': ['score']}</field>
     </record>
 </odoo>
