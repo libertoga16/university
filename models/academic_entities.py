@@ -18,7 +18,6 @@ class Department(models.Model):
     discipline or administrative unit.
     """
     _name = 'university.department'
-    _inherit = ['batch.count.mixin']
     _description = 'Department'
 
     # CORE FIELDS 
@@ -62,9 +61,17 @@ class Department(models.Model):
         """
         Compute the number of professors in the department.
         """
-        prof_map = self._get_batch_counts('university.professor', 'department_id')
+        if not self.ids:
+            for record in self:
+                record.professor_count = 0
+            return
+            
+        domain = [('department_id', 'in', self.ids)]
+        groups = self.env['university.professor']._read_group(domain, ['department_id'], ['__count'])
+        count_map = {department.id: count for department, count in groups}
+        
         for record in self:
-            record.professor_count = prof_map.get(record.id, 0)
+            record.professor_count = count_map.get(record.id, 0)
 
 
 
@@ -78,7 +85,7 @@ class UniversityProfessor(models.Model):
     departments. Links recursively to enrollments and departments.
     """
     _name = 'university.professor'
-    _inherit = ['image.mixin', 'batch.count.mixin']
+    _inherit = ['image.mixin']
     _description = 'University Professor'
 
     #  CORE FIELDS 
@@ -133,9 +140,17 @@ class UniversityProfessor(models.Model):
         """
         Compute the number of enrollments associated with the professor.
         """
-        enrollment_map = self._get_batch_counts('university.enrollment', 'professor_id')
+        if not self.ids:
+            for record in self:
+                record.enrollment_count = 0
+            return
+
+        domain = [('professor_id', 'in', self.ids)]
+        groups = self.env['university.enrollment']._read_group(domain, ['professor_id'], ['__count'])
+        count_map = {professor.id: count for professor, count in groups}
+
         for record in self:
-            record.enrollment_count = enrollment_map.get(record.id, 0)
+            record.enrollment_count = count_map.get(record.id, 0)
 
 
 
@@ -144,7 +159,7 @@ class UniversityProfessor(models.Model):
 
 class UniversityStudent(models.Model):
     _name = 'university.student'
-    _inherit = ['mail.thread', 'mail.activity.mixin', 'batch.count.mixin'] 
+    _inherit = ['mail.thread', 'mail.activity.mixin'] 
     _description = 'University Student'
 
     # CORE FIELDS 
@@ -171,27 +186,34 @@ class UniversityStudent(models.Model):
     image_1920 = fields.Image(string="Image")
     image_128 = fields.Image(related='image_1920', max_width=128, store=True, string="Thumbnail")
 
-    # COMPUTED FIELDS 
+    # BACKGROUND PROCESSING FIELDS
+    report_pending = fields.Boolean(string="Report Pending", default=False, help="Flag to indicate a report generation is pending for cron job.")
+
+    # COMPUTED FIELDS
     enrollment_count = fields.Integer(compute='_compute_counts')
     grade_count = fields.Integer(compute='_compute_counts')
 
     # ORM OVERRIDES 
     @api.model_create_multi
     def create(self, vals_list):
-        students = super(UniversityStudent, self).create(vals_list)
+        students = super().create(vals_list)
+        users_to_create = []
         
-        # Auto-create Portal User for each new student
-        for student in students:
-            if student.email and not student.user_id:
-                user = self.env['res.users'].search([('login', '=', student.email)], limit=1)
-                if not user:
-                    user = self.env['res.users'].create({
-                        'name': student.name,
-                        'login': student.email,
-                        'email': student.email,
-                        'group_ids': [(6, 0, [self.env.ref('base.group_portal').id])],
-                        'password': 'odoo' 
-                    })
+        # 1. Preparar datos en memoria
+        for student in students.filtered(lambda s: s.email and not s.user_id):
+            users_to_create.append({
+                'name': student.name,
+                'login': student.email,
+                'email': student.email,
+                'group_ids': [(6, 0, [self.env.ref('base.group_portal').id])],
+                'password': 'odoo' 
+            })
+        
+        # 2. Inserción masiva con sudo()
+        if users_to_create:
+            new_users = self.env['res.users'].sudo().create(users_to_create)
+            # 3. Mapeo eficiente
+            for student, user in zip(students.filtered(lambda s: s.email and not s.user_id), new_users):
                 student.user_id = user.id
                 
         return students
@@ -211,8 +233,14 @@ class UniversityStudent(models.Model):
                 record.grade_count = 0
             return
 
-        enroll_map = self._get_batch_counts('university.enrollment', 'student_id')
-        grade_map = self._get_batch_counts('university.grade', 'student_id')
+        Enrollment = self.env['university.enrollment']
+        Grade = self.env['university.grade']
+
+        enroll_groups = Enrollment._read_group([('student_id', 'in', self.ids)], ['student_id'], ['__count'])
+        enroll_map = {student.id: count for student, count in enroll_groups}
+
+        grade_groups = Grade._read_group([('student_id', 'in', self.ids)], ['student_id'], ['__count'])
+        grade_map = {student.id: count for student, count in grade_groups}
 
         for record in self:
             record.enrollment_count = enroll_map.get(record.id, 0)
@@ -220,49 +248,68 @@ class UniversityStudent(models.Model):
 
     def action_send_email(self) -> Dict[str, Any]:
         """
-        Generates the PDF report and opens the email composer with it attached.
+        Marks student as pending report generation for async processing.
         """
-        self.ensure_one()
-        template = self.env.ref('university.email_template_student_report')
-        
-        ctx = {
-            'default_model': 'university.student',
-            'default_res_ids': self.ids,
-            'default_use_template': bool(template),
-            'default_template_id': template.id,
-            'default_composition_mode': 'comment',
-            'force_email': True,
-        }
-
-        report_action = self.env.ref('university.action_report_student')
-        pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(report_action, self.ids)
-        
-        attachment = self.env['ir.attachment'].create({
-            'name': f"Informe_{self.name.replace(' ', '_')}.pdf",
-            'type': 'binary',
-            'datas': base64.b64encode(pdf_content),
-            'res_model': 'university.student',
-            'res_id': self.id,
-            'mimetype': 'application/pdf',
-        })
-        
-        ctx['default_attachment_ids'] = [(4, attachment.id)]
-        
+        self.write({'report_pending': True})
         return {
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_model': 'mail.compose.message',
-            'views': [(False, 'form')],
-            'view_id': False,
-            'target': 'new',
-            'context': ctx,
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': 'Report Queued',
+                'message': 'The academic report is being generated and will be sent shortly.',
+                'type': 'success',
+                'sticky': False,
+            }
         }
+        
+    @api.model
+    def _cron_process_pending_reports(self) -> None:
+        """
+        Cron job to process pending reports synchronously in background.
+        """
+        students = self.search([('report_pending', '=', True)])
+        if not students:
+            return
+            
+        template = self.env.ref('university.email_template_student_report')
+        report_action = self.env.ref('university.action_report_student')
+        
+        for student in students:
+            try:
+                # Generate PDF
+                pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(report_action, student.ids)
+                
+                attachment = self.env['ir.attachment'].create({
+                    'name': f"Informe_{student.name.replace(' ', '_')}.pdf",
+                    'type': 'binary',
+                    'datas': base64.b64encode(pdf_content),
+                    'res_model': 'university.student',
+                    'res_id': student.id,
+                    'mimetype': 'application/pdf',
+                })
+                
+                # Send Mail
+                template.with_context(force_email=True).send_mail(
+                    student.id, 
+                    email_values={'attachment_ids': [(4, attachment.id)]}
+                )
+                
+                student.report_pending = False
+                self.env.cr.commit() # Intermittent commit for large batches
+            except Exception as e:
+                _logger.error("Failed to generate report for Student %s: %s", student.id, e)
 
     def get_subject_summary(self):
         """Devuelve una lista de diccionarios con el resumen por asignatura"""
+        self.ensure_one()
         summary = []
-        for enrollment in self.enrollment_ids:
+        # Prefetch de notas para evitar N+1 queries
+        enrollments = self.enrollment_ids.with_context(prefetch_fields=False)
+        enrollments.mapped('grade_ids') 
+        
+        for enrollment in enrollments:
             grades = enrollment.grade_ids
+            # Evita sum() en python si puedes hacerlo por BD, o al menos no lo hagas por registro.
             avg_score = sum(grades.mapped('score')) / len(grades) if grades else 0.0
             
             summary.append({

@@ -44,9 +44,9 @@
                             </thead>
                             <tbody>
                                 <tr t-foreach="o.get_subject_summary()" t-as="summary">
-                                    <td><span t-esc="summary['subject']"/></td>
-                                    <td><span t-esc="summary['professor']"/></td>
-                                    <td class="text-end"><span t-esc="summary['average']" t-options='{"widget": "float", "precision": 2}'/></td>
+                                    <td><span t-out="summary['subject']"/></td>
+                                    <td><span t-out="summary['professor']"/></td>
+                                    <td class="text-end"><span t-out="summary['average']" t-options='{"widget": "float", "precision": 2}'/></td>
                                 </tr>
                             </tbody>
                         </table>

@@ -84,7 +84,7 @@ class EnrollmentWizard(models.TransientModel):
         # Use batch create
         enrollments = self.env['university.enrollment'].create(vals_list)
 
-        _logger.info(f"Batch created {len(enrollments)} enrollments via wizard.")
+        _logger.info("Batch created %d enrollments via wizard.", len(enrollments))
 
         return {
             'name': _('Created Enrollments'),

@@ -16,7 +16,6 @@ class Subject(models.Model):
     who teach it and students who enroll in it.
     """
     _name = 'university.subject'
-    _inherit = ['batch.count.mixin']
     _description = 'Subject'
 
     # CORE FIELDS
@@ -74,9 +73,17 @@ class Subject(models.Model):
         """
         Compute the number of enrollments for the subject.
         """
-        enrollment_map = self._get_batch_counts('university.enrollment', 'subject_id')
+        if not self.ids:
+            for record in self:
+                record.enrollment_count = 0
+            return
+
+        domain = [('subject_id', 'in', self.ids)]
+        groups = self.env['university.enrollment']._read_group(domain, ['subject_id'], ['__count'])
+        count_map = {subject.id: count for subject, count in groups}
+
         for record in self:
-            record.enrollment_count = enrollment_map.get(record.id, 0)
+            record.enrollment_count = count_map.get(record.id, 0)
 
 
 # Enrollment
@@ -150,13 +157,16 @@ class Enrollment(models.Model):
         """
         Create enrollment records with auto-generated sequence codes.
 
-        Architectural Decision: Optimization of Sequence Generation.
-        We use the 'ir.sequence' model properly to handle concurrent sequence generation.
+        Architectural Decision: To avoid N+1 queries during bulk wizard imports, 
+        we only generate sequences if explicitly requested or if it's a single record creation.
+        For massive batches, it's recommended to skip sequence generation initially to avoid DB locks.
         """
-        for vals in vals_list:
-            if vals.get('code', 'New') == 'New':
-                # Use standard Odoo sequence properly
-                vals['code'] = self.env['ir.sequence'].next_by_code('university.enrollment') or 'New'
+        if not self.env.context.get('skip_sequence_generation'):
+            # Fetch the sequence record once if needed to avoid repeated lookups
+            sequence = self.env['ir.sequence'].search([('code', '=', 'university.enrollment')], limit=1)
+            for vals in vals_list:
+                if vals.get('code', 'New') == 'New':
+                    vals['code'] = sequence._next() if sequence else 'New'
 
         return super(Enrollment, self).create(vals_list)
 

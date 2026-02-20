@@ -30,7 +30,9 @@ Key Features:
     ],
     'data': [
         'security/ir.model.access.csv',
+        'security/ir.rule.xml',
         'data/university_sequence.xml',
+        'data/ir_cron_data.xml',
         'reports/student_report.xml',
         'data/mail_template_data.xml',
         'views/university_actions.xml',

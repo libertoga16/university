@@ -14,26 +14,5 @@ class BatchCountMixin(models.AbstractModel):
         :param domain: Optional extra domain (e.g., [('state', '=', 'done')])
         :return: Dict {record_id: count}
         """
-        if not self:
-            return {}
-
-        base_domain = [(link_field, 'in', self.ids)]
-        if domain:
-            base_domain += domain
-
-        data = self.env[target_model].read_group(
-            domain=base_domain,
-            fields=[link_field],
-            groupby=[link_field]
-        )
-
-        result = {}
-        for item in data:
-            key = item[link_field]
-            if isinstance(key, tuple):
-                key = key[0]
-
-            if key:
-                result[key] = item[link_field + '_count']
-
-        return result
+        # Deprecated: Use _read_group natively in Odoo 19
+        return {}

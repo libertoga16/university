@@ -12,17 +12,15 @@ class UniversityPortal(CustomerPortal):
         if 'grade_count' in counters:
             # Match student by user_id linkage (Exercise 9)
             user = request.env.user
-            _logger.info(f"PORTAL DEBUG: Current User: {user.name} (ID: {user.id})")
+            _logger.info("PORTAL DEBUG: Current User: %s (ID: %s)", user.name, user.id)
             
-            student = request.env['university.student'].sudo().search([('user_id', '=', user.id)], limit=1)
-            _logger.info(f"PORTAL DEBUG: Found Linked Student: {student.name if student else 'None'}")
+            # The portal user can only see their own student profile due to ir.rule.
+            student = request.env['university.student'].search([('user_id', '=', user.id)], limit=1)
+            _logger.info("PORTAL DEBUG: Found Linked Student: %s", student.name if student else 'None')
             
             if student:
                 values['grade_count'] = len(student.grade_ids)
             else:
-                 # Ensure count is 0 not None so t-if works, or simple don't set it? 
-                 # If we don't set it, we need a way to tell the template to hide the tile.
-                 # Let's set it to 0 and handle visibility in template or just only set if student exists.
                  values['grade_count'] = 0
                  
         return values
@@ -32,16 +30,13 @@ class UniversityPortal(CustomerPortal):
         values = self._prepare_portal_layout_values()
         
         user = request.env.user
-        _logger.info(f"PORTAL DEBUG (Grades Page): User ID: {user.id}")
+        _logger.info("PORTAL DEBUG (Grades Page): User ID: %s", user.id)
         
-        # Linkage check
-        student = request.env['university.student'].sudo().search([('user_id', '=', user.id)], limit=1)
-        _logger.info(f"PORTAL DEBUG (Grades Page): Student found: {student}")
+        # Security: If no student linked, they shouldn't access this page conceptually.
+        # ir.rule enforces that they can only read their student record anyway.
+        student = request.env['university.student'].search([('user_id', '=', user.id)], limit=1)
+        _logger.info("PORTAL DEBUG (Grades Page): Student found: %s", student)
         
-        # Security: If no student linked, they shouldn't access this page conceptually,
-        # but showing empty is safer than 403. However requirement says "no debe poder ver el menú y el acceso".
-        # We will handle menu visibility in template. Here just robust query.
-
         domain = [('student_id', '=', student.id)] if student else [('id', '=', -1)]
 
         grade_obj = request.env['university.grade']
@@ -56,7 +51,7 @@ class UniversityPortal(CustomerPortal):
         order = searchbar_sortings[sortby]['order']
 
         # pager
-        grade_count = grade_obj.sudo().search_count(domain)
+        grade_count = grade_obj.search_count(domain)
         pager = portal_pager(
             url="/my/grades",
             url_args={'date_begin': date_begin, 'date_end': date_end, 'sortby': sortby},
@@ -65,7 +60,7 @@ class UniversityPortal(CustomerPortal):
             step=self._items_per_page
         )
 
-        grades = grade_obj.sudo().search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
+        grades = grade_obj.search(domain, order=order, limit=self._items_per_page, offset=pager['offset'])
         
         values.update({
             'date': date_begin,
