@@ -17,15 +17,19 @@ class University(models.Model):
     _inherit = ['image.mixin', 'batch.count.mixin']
     _description = 'University'
 
-    # === CORE FIELDS ===
+    #CORE FIELDS
     name = fields.Char(
         string='Name',
         required=True,
         index=True,
         help="Official name of the university."
     )
+    email = fields.Char(
+        string='Email',
+        help="University email address."
+    )
 
-    # === ADDRESS FIELDS ===
+    #ADDRESS FIELDS 
     street = fields.Char(
         string='Street',
         help="Street address."
@@ -43,7 +47,6 @@ class University(models.Model):
     state_id = fields.Many2one(
         comodel_name='res.country.state',
         string='State',
-        # Architectural Fix: Explicit domain dependency on country_id
         domain="[('country_id', '=', country_id)]",
         help="State or province."
     )
@@ -52,7 +55,7 @@ class University(models.Model):
         help="Postal code."
     )
 
-    # === RELATIONAL FIELDS ===
+    # RELATIONAL FIELDS 
     professor_ids = fields.One2many(
         comodel_name='university.professor',
         inverse_name='university_id',

@@ -14,10 +14,11 @@ class TestEnrollmentWizard(TransactionCase):
         self.professor = self.env['university.professor'].create({
             'name': 'Test Professor',
             'university_id': self.university.id,
-            'department_ids': [(4, self.department.id)]
+            'department_id': self.department.id
         })
         self.subject = self.env['university.subject'].create({
             'name': 'Test Subject',
+            'code': 'TES101',
             'university_id': self.university.id,
             'department_id': self.department.id,
             'professor_ids': [(4, self.professor.id)]
@@ -66,4 +67,4 @@ class TestEnrollmentWizard(TransactionCase):
             self.assertEqual(enrollment.university_id, self.university)
             self.assertEqual(enrollment.subject_id, self.subject)
             self.assertEqual(enrollment.professor_id, self.professor)
-            self.assertTrue(enrollment.code.startswith('TES'))  # Prefix from subject name 'Test Subject'
+            self.assertTrue(enrollment.code.startswith('ENR'))  # Standard Enrollment prefix

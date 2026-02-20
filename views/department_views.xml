@@ -8,8 +8,8 @@
             <form>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                         <button name="action_view_professors" type="object" class="oe_stat_button" icon="fa-user-tie">
-                            <field name="professor_count" widget="statinfo" string="Professors"/>
+                        <button name="%(action_university_professor)d" type="action" class="oe_stat_button" icon="fa-user-tie" context="{'search_default_department_id': id, 'default_department_id': id}">
+                             <field name="professor_count" widget="statinfo" string="Professors"/>
                         </button>
                     </div>
                     <group>
@@ -102,10 +102,5 @@
         </field>
     </record>
 
-    <!-- ACTION -->
-    <record id="action_university_department" model="ir.actions.act_window">
-        <field name="name">Departments</field>
-        <field name="res_model">university.department</field>
-        <field name="view_mode">list,form,kanban</field>
-    </record>
+
 </odoo>

@@ -1,31 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
         <record id="email_template_student_report" model="mail.template">
             <field name="name">Student Report: Send by email</field>
             <field name="model_id" ref="university.model_university_student"/>
-            <field name="subject">Student Report - {{ object.name }}</field>
-            <field name="email_from">{{ (object.tutor_id.email or user.email_formatted) }}</field>
+            <field name="subject">Informe Académico - {{ object.name }}</field>
+            <field name="email_from">{{ (object.university_id.email or user.email_formatted) }}</field>
             <field name="email_to">{{ object.email }}</field>
-            <field name="description">Sent to students with their academic report</field>
+            <field name="description">Enviado a estudiantes con sus notas académicas</field>
+            
+   
+            
             <field name="body_html" type="html">
                 <div style="margin: 0px; padding: 0px;">
                     <p style="margin: 0px; padding: 0px; font-size: 13px;">
-                        Hello <t t-out="object.name"/>,
+                        Hola <t t-out="object.name"/>,
                         <br/><br/>
-                        Here is your academic report from <t t-out="object.university_id.name"/>.
-                        <br/><br/>
-                        Please find the attached PDF report.
-                        <br/><br/>  
-                        Best regards,
+                        Adjunto encontrarás tu último <strong>Informe Académico</strong> emitido por <strong t-out="object.university_id.name"/>.
                         <br/>
-                        <t t-out="object.tutor_id.name or user.name"/>
+                        En este documento se detallan tus asignaturas cursadas, profesores y calificaciones obtenidas hasta la fecha.
+                        <br/><br/>
+                        Si tienes alguna duda con respecto a la información presentada, por favor contacta con la secretaría de tu universidad.
+                        <br/><br/>
+                        Atentamente,
+                        <br/>
+                        <strong>Administración Académica</strong>
                     </p>
                 </div>
             </field>
-
-            <field name="lang">{{ object.env.user.lang }}</field>
-            <field name="auto_delete" eval="True"/>
         </record>
     </data>
 </odoo>

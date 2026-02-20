@@ -8,3 +8,12 @@ access_university_enrollment_user,university.enrollment.user,model_university_en
 access_university_grade_user,university.grade.user,model_university_grade,base.group_user,1,1,1,1
 access_university_report_user,university.report.user,model_university_report,base.group_user,1,1,1,1
 access_university_enrollment_wizard_user,university.enrollment.wizard.user,model_university_enrollment_wizard,base.group_user,1,1,1,1
+access_university_grade_portal,university.grade.portal,model_university_grade,base.group_portal,1,0,0,0
+access_university_student_portal,university.student.portal,model_university_student,base.group_portal,1,0,0,0
+access_university_enrollment_portal,university.enrollment.portal,model_university_enrollment,base.group_portal,1,0,0,0
+access_university_subject_portal,university.subject.portal,model_university_subject,base.group_portal,1,0,0,0
+access_university_professor_portal,university.professor.portal,model_university_professor,base.group_portal,1,0,0,0
+access_university_university_portal,university.university.portal,model_university_university,base.group_portal,1,0,0,0
+access_university_university_public,university.university.public,model_university_university,base.group_public,1,0,0,0
+access_university_professor_public,university.professor.public,model_university_professor,base.group_public,1,0,0,0
+access_university_department_public,university.department.public,model_university_department,base.group_public,1,0,0,0

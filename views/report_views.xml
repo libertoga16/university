@@ -44,10 +44,5 @@
         </field>
     </record>
 
-    <!-- ACTION -->
-    <record id="action_university_report" model="ir.actions.act_window">
-        <field name="name">Academic Reports</field>
-        <field name="res_model">university.report</field>
-        <field name="view_mode">pivot,graph</field>
-    </record>
+
 </odoo>

@@ -1,38 +1,22 @@
-# -*- coding: utf-8 -*-
-from typing import Any
-
 from odoo import http
 from odoo.http import request
 
+class UniversityWebsite(http.Controller):
 
-class UniversityController(http.Controller):
-    """
-    Website controller for the University module.
-
-    Handles public routes for listing universities and professors.
-    """
-
-    @http.route('/university', type='http', auth='public', website=True)
-    def index(self, **kw: Any) -> Any:
-        """
-        Render the list of universities.
-        """
-        universities = request.env['university.university'].search([])
-        return request.render('university.university_list', {
+    # Página 1: Universidades
+    @http.route('/universidad', auth='public', website=True)
+    def list_universities(self, **kw):
+        # Obtenemos todas las universidades
+        universities = request.env['university.university'].sudo().search([])
+        return request.render('university.website_uni_list', {
             'universities': universities
         })
 
-    @http.route('/university/<model("university.university"):university>', type='http', auth='public', website=True)
-    def university_professors(self, university: Any, **kw: Any) -> Any:
-        """
-        Render the list of professors for a specific university.
-
-        :param university: The university record.
-        """
-        professors = request.env['university.professor'].search([
-            ('university_id', '=', university.id)
-        ])
-        return request.render('university.university_professor_list', {
-            'university': university,
-            'professors': professors
+    # Profesores de una Universidad específica
+    # Usamos el convertidor de URL <model(...)> para obtener el objeto directamente
+    @http.route('/universidad/<model("university.university"):uni>', auth='public', website=True)
+    def list_professors(self, uni, **kw):
+        return request.render('university.website_prof_list', {
+            'university': uni,
+            'professors': uni.professor_ids # Asumiendo relación One2many en University
         })

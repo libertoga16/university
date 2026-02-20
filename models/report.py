@@ -86,8 +86,6 @@ class UniversityReport(models.Model):
                 LEFT JOIN
                     university_professor p ON e.professor_id = p.id
                 LEFT JOIN
-                    university_prof_dept_rel rel ON p.id = rel.prof_id
-                LEFT JOIN
-                    university_department d ON rel.dept_id = d.id
+                    university_department d ON p.department_id = d.id
             )
         """ % (self._table))

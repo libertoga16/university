@@ -7,9 +7,7 @@ from odoo import models, fields, api
 _logger = logging.getLogger(__name__)
 
 
-# ============================================================================
 # Subject
-# ============================================================================
 class Subject(models.Model):
     """
     Architectural entity representing an Academic Subject.
@@ -21,7 +19,7 @@ class Subject(models.Model):
     _inherit = ['batch.count.mixin']
     _description = 'Subject'
 
-    # === CORE FIELDS ===
+    # CORE FIELDS
     name = fields.Char(
         string='Name',
         required=True,
@@ -35,7 +33,7 @@ class Subject(models.Model):
         help="Unique identifier code."
     )
 
-    # === RELATIONAL FIELDS ===
+    # RELATIONAL FIELDS 
     department_id = fields.Many2one(
         comodel_name='university.department',
         string='Department',
@@ -64,7 +62,7 @@ class Subject(models.Model):
         help="All enrollments for this subject."
     )
 
-    # === COMPUTED FIELDS ===
+    # COMPUTED FIELDS 
     enrollment_count = fields.Integer(
         compute='_compute_counts',
         string='Enrollment Count',
@@ -81,9 +79,7 @@ class Subject(models.Model):
             record.enrollment_count = enrollment_map.get(record.id, 0)
 
 
-# ============================================================================
 # Enrollment
-# ============================================================================
 class Enrollment(models.Model):
     """
     Architectural entity representing a Student Enrollment.
@@ -95,7 +91,7 @@ class Enrollment(models.Model):
     _description = 'Enrollment'
     _rec_name = 'code'
 
-    # === CORE FIELDS ===
+    # CORE FIELDS
     code = fields.Char(
         string='Code',
         required=True,
@@ -105,7 +101,7 @@ class Enrollment(models.Model):
         help="Unique enrollment identifier."
     )
 
-    # === RELATIONAL FIELDS ===
+    # RELATIONAL FIELDS
     student_id = fields.Many2one(
         comodel_name='university.student',
         string='Student',
@@ -164,10 +160,7 @@ class Enrollment(models.Model):
 
         return super(Enrollment, self).create(vals_list)
 
-
-# ============================================================================
 # Grade
-# ============================================================================
 class Grade(models.Model):
     """
     Architectural entity representing a Grade.
