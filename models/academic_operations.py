@@ -60,26 +60,39 @@ class Enrollment(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list: List[Dict[str, Any]]) -> Any:
-        for vals in vals_list:
-            if vals.get('code', 'New') == 'New' and vals.get('subject_id'):
-                subject = self.env['university.subject'].browse(vals['subject_id'])
-                # Primeras 3 letras en mayúsculas (fallback a UNK si no hay nombre)
-                prefix_str = (subject.name[:3].upper() if subject.name else 'UNK')
-                # Uso correcto de variables dinámicas de Odoo
-                prefix = f"{prefix_str}/%(year)s/"
+        # 1. Extraer IDs únicos de asignaturas necesarias para las nuevas matrículas
+        subject_ids = {
+            vals['subject_id'] 
+            for vals in vals_list 
+            if vals.get('code', 'New') == 'New' and vals.get('subject_id')
+        }
+        
+        if subject_ids:
+            subjects = self.env['university.subject'].browse(list(subject_ids))
+            seq_map = {}
+            
+            # 2. Buscar o crear todas las secuencias necesarias en lote
+            for subject in subjects:
                 seq_code = f"enrollment.subject.{subject.id}"
-                
                 seq = self.env['ir.sequence'].sudo().search([('code', '=', seq_code)], limit=1)
+                
                 if not seq:
+                    prefix_str = (subject.name[:3].upper() if subject.name else 'UNK')
                     seq = self.env['ir.sequence'].sudo().create({
                         'name': f'Secuencia Matrícula {subject.name}',
                         'code': seq_code,
-                        'prefix': prefix,
+                        'prefix': f"{prefix_str}/%(year)s/",
                         'padding': 4,
-                        'use_date_range': True, # Reinicia el 0001 cada 1 de enero
+                        'use_date_range': True,
                         'company_id': False,
                     })
-                vals['code'] = seq.next_by_id()
+                seq_map[subject.id] = seq
+
+            # 3. Asignar los códigos iterando solo en memoria RAM
+            for vals in vals_list:
+                if vals.get('code', 'New') == 'New' and vals.get('subject_id'):
+                    vals['code'] = seq_map[vals['subject_id']].next_by_id()
+                    
         return super().create(vals_list)
 
 

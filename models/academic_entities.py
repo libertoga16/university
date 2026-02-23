@@ -223,23 +223,24 @@ class ResUsers(models.Model):
     def create(self, vals_list):
         users = super().create(vals_list)
         
-        # 1. Extraer todos los emails en memoria
         emails = [e for u in users for e in (u.login, u.email) if e]
-        
         if emails:
-            # 2. Búsqueda masiva única (1 sola query)
             students = self.env['university.student'].sudo().search([
                 ('email', 'in', emails),
                 ('user_id', '=', False)
             ])
             
-            # 3. Mapeo rápido
-            student_map = {s.email: s for s in students}
+            # Mapeo seguro agrupando en listas para no perder colisiones
+            from collections import defaultdict
+            student_map = defaultdict(list)
+            for s in students:
+                student_map[s.email].append(s)
             
-            # 4. Asignación directa
             for user in users:
-                match = student_map.get(user.email) or student_map.get(user.login)
-                if match:
+                matches = student_map.get(user.email) or student_map.get(user.login)
+                if matches:
+                    # Enlazar al primer estudiante huérfano encontrado
+                    match = matches.pop(0) 
                     match.user_id = user.id
         return users
 
