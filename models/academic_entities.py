@@ -29,7 +29,7 @@ class Department(models.Model):
 # Professor
 class UniversityProfessor(models.Model):
     _name = 'university.professor'
-    _inherit = ['image.mixin', 'batch.count.mixin']
+    _inherit = ['image.mixin', 'batch.count.mixin', 'website.published.mixin', 'website.seo.metadata']
     _description = 'University Professor'
 
     name = fields.Char(string='Name', required=True, index=True)
@@ -82,18 +82,29 @@ class UniversityStudent(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         students = super().create(vals_list)
-        
-        # Robust user creation linking directly to the created student instance
         portal_group = self.env.ref('base.group_portal').id
-        for student in students.filtered(lambda s: s.email and not s.user_id):
-            user = self.env['res.users'].sudo().create({
-                'name': student.name,
-                'login': student.email,
-                'email': student.email,
+        
+        # 1. Identificar estudiantes que necesitan usuario
+        students_to_link = students.filtered(lambda s: s.email and not s.user_id)
+        
+        if students_to_link:
+            # 2. Preparar el lote de creación
+            user_vals = [{
+                'name': s.name,
+                'login': s.email,
+                'email': s.email,
                 'groups_id': [(6, 0, [portal_group])],
-            })
-            student.user_id = user.id
-                
+            } for s in students_to_link]
+            
+            # 3. Inserción única masiva (1 sola query)
+            users = self.env['res.users'].sudo().create(user_vals)
+            
+            # 4. Enlace en memoria seguro (evita errores de orden del zip)
+            users_by_email = {u.email: u for u in users}
+            for student in students_to_link:
+                if student.email in users_by_email:
+                    student.user_id = users_by_email[student.email].id
+                    
         return students
   
     @api.depends('enrollment_ids', 'grade_ids')
@@ -200,27 +211,40 @@ class ResUsers(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         users = super().create(vals_list)
-        for user in users:
-            emails_to_check = [e for e in [user.login, user.email] if e]
-            if emails_to_check:
-                students = self.env['university.student'].sudo().search([
-                    ('email', 'in', emails_to_check),
-                    ('user_id', '=', False)
-                ])
-                if students:
-                    students.write({'user_id': user.id})
+        
+        # 1. Extraer todos los emails en memoria
+        emails = [e for u in users for e in (u.login, u.email) if e]
+        
+        if emails:
+            # 2. Búsqueda masiva única (1 sola query)
+            students = self.env['university.student'].sudo().search([
+                ('email', 'in', emails),
+                ('user_id', '=', False)
+            ])
+            
+            # 3. Mapeo rápido
+            student_map = {s.email: s for s in students}
+            
+            # 4. Asignación directa
+            for user in users:
+                match = student_map.get(user.email) or student_map.get(user.login)
+                if match:
+                    match.user_id = user.id
         return users
 
     def write(self, vals):
         res = super().write(vals)
+        # Optimizar también la escritura
         if 'login' in vals or 'email' in vals:
-            for user in self:
-                emails_to_check = [e for e in [user.login, user.email] if e]
-                if emails_to_check:
-                    students = self.env['university.student'].sudo().search([
-                        ('email', 'in', emails_to_check),
-                        ('user_id', '=', False)
-                    ])
-                    if students:
-                        students.write({'user_id': user.id})
+            emails = [e for u in self for e in (u.login, u.email) if e]
+            if emails:
+                students = self.env['university.student'].sudo().search([
+                    ('email', 'in', emails),
+                    ('user_id', '=', False)
+                ])
+                student_map = {s.email: s for s in students}
+                for user in self:
+                    match = student_map.get(user.email) or student_map.get(user.login)
+                    if match:
+                        match.user_id = user.id
         return res

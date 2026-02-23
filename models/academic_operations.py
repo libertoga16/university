@@ -45,6 +45,12 @@ class Enrollment(models.Model):
     subject_id = fields.Many2one('university.subject', string='Subject', required=True, index=True)
     grade_ids = fields.One2many('university.grade', 'enrollment_id', string='Grades')
 
+    _sql_constraints = [
+        ('unique_student_subject', 
+         'UNIQUE(student_id, subject_id)', 
+         'Integrity Error: Un estudiante no puede estar matriculado más de una vez en la misma asignatura.')
+    ]
+
     @api.depends('code', 'student_id.name')
     def _compute_display_name(self) -> None:
         for record in self:
