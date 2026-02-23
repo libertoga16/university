@@ -1,218 +1,81 @@
 import logging
-from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from odoo import models, fields, api
 
 _logger = logging.getLogger(__name__)
 
-
 # Subject
 class Subject(models.Model):
-    """
-    Architectural entity representing an Academic Subject.
-
-    A specific course of study offered by a department. It links professors
-    who teach it and students who enroll in it.
-    """
     _name = 'university.subject'
+    _inherit = ['batch.count.mixin']
     _description = 'Subject'
 
-    # CORE FIELDS
-    name = fields.Char(
-        string='Name',
-        required=True,
-        index=True,
-        help="Name of the subject."
-    )
-    code = fields.Char(
-        string='Code',
-        required=True,
-        index=True,
-        help="Unique identifier code."
-    )
+    name = fields.Char(string='Name', required=True, index=True)
+    code = fields.Char(string='Code', required=True, index=True)
 
-    # RELATIONAL FIELDS 
-    department_id = fields.Many2one(
-        comodel_name='university.department',
-        string='Department',
-        required=True,
-        index=True,
-        help="Department offering this subject."
-    )
+    department_id = fields.Many2one('university.department', string='Department', required=True, index=True)
     university_id = fields.Many2one(
-        comodel_name='university.university',
-        related='department_id.university_id',
-        string='University',
-        store=True,
-        readonly=True,
-        index=True,
-        help="University offering this subject (computed from department)."
+        'university.university', related='department_id.university_id', 
+        store=True, readonly=True, index=True
     )
-    professor_ids = fields.Many2many(
-        comodel_name='university.professor',
-        string='Professors',
-        help="Professors qualified to teach this subject."
-    )
-    enrollment_ids = fields.One2many(
-        comodel_name='university.enrollment',
-        inverse_name='subject_id',
-        string='Enrollments',
-        help="All enrollments for this subject."
-    )
+    professor_ids = fields.Many2many('university.professor', string='Professors')
+    enrollment_ids = fields.One2many('university.enrollment', 'subject_id', string='Enrollments')
 
-    # COMPUTED FIELDS 
-    enrollment_count = fields.Integer(
-        compute='_compute_counts',
-        string='Enrollment Count',
-        help="Total number of students enrolled."
-    )
+    enrollment_count = fields.Integer(compute='_compute_counts', string='Enrollment Count')
 
     @api.depends('enrollment_ids')
     def _compute_counts(self) -> None:
-        """
-        Compute the number of enrollments for the subject.
-        """
-        if not self.ids:
-            for record in self:
-                record.enrollment_count = 0
-            return
-
-        domain = [('subject_id', 'in', self.ids)]
-        groups = self.env['university.enrollment']._read_group(domain, ['subject_id'], ['__count'])
-        count_map = {subject.id: count for subject, count in groups}
-
+        counts = self._get_batch_counts('university.enrollment', 'subject_id')
         for record in self:
-            record.enrollment_count = count_map.get(record.id, 0)
+            record.enrollment_count = counts.get(record.id, 0)
 
 
 # Enrollment
 class Enrollment(models.Model):
-    """
-    Architectural entity representing a Student Enrollment.
-
-    Junction record linking a student to a specific subject, professor, and university
-    for a given academic term. It serves as the parent record for grades.
-    """
     _name = 'university.enrollment'
     _description = 'Enrollment'
     _rec_name = 'code'
 
-    # CORE FIELDS
-    code = fields.Char(
-        string='Code',
-        required=True,
-        default=lambda self: 'New',
-        copy=False,
-        index=True,
-        help="Unique enrollment identifier."
-    )
+    code = fields.Char(string='Code', required=True, default='New', copy=False, index=True)
 
-    # RELATIONAL FIELDS
-    student_id = fields.Many2one(
-        comodel_name='university.student',
-        string='Student',
-        required=True,
-        index=True,
-        help="enrolled student."
-    )
-    university_id = fields.Many2one(
-        comodel_name='university.university',
-        string='University',
-        required=True,
-        index=True,
-        help="University where enrollment is registered."
-    )
-    professor_id = fields.Many2one(
-        comodel_name='university.professor',
-        string='Professor',
-        index=True,
-        help="Professor teaching the subject."
-    )
-    subject_id = fields.Many2one(
-        comodel_name='university.subject',
-        string='Subject',
-        required=True,
-        index=True,
-        help="Subject being taken."
-    )
+    student_id = fields.Many2one('university.student', string='Student', required=True, index=True)
+    university_id = fields.Many2one('university.university', string='University', required=True, index=True)
+    professor_id = fields.Many2one('university.professor', string='Professor', index=True)
+    subject_id = fields.Many2one('university.subject', string='Subject', required=True, index=True)
+    grade_ids = fields.One2many('university.grade', 'enrollment_id', string='Grades')
 
-    grade_ids = fields.One2many(
-        comodel_name='university.grade',
-        inverse_name='enrollment_id',
-        string='Grades',
-        help="Grades associated with this enrollment."
-    )
-
+    @api.depends('code', 'student_id.name')
     def _compute_display_name(self) -> None:
-        """
-        Compute the display name for the enrollment.
-        Format: [Code] - [Student Name]
-        """
         for record in self:
-            record.display_name = f"{record.code} - {record.student_id.name}"
+            record.display_name = f"{record.code or ''} - {record.student_id.name or ''}"
 
     @api.model_create_multi
     def create(self, vals_list: List[Dict[str, Any]]) -> Any:
-        """
-        Create enrollment records with auto-generated sequence codes.
-
-        Architectural Decision: To avoid N+1 queries during bulk wizard imports, 
-        we only generate sequences if explicitly requested or if it's a single record creation.
-        For massive batches, it's recommended to skip sequence generation initially to avoid DB locks.
-        """
+        # Standard approach: Utilize ir.sequence explicitly for batch creation.
+        # Calling private methods like `sequence._next()` is bad practice in Odoo 19.
         if not self.env.context.get('skip_sequence_generation'):
-            # Fetch the sequence record once if needed to avoid repeated lookups
-            sequence = self.env['ir.sequence'].search([('code', '=', 'university.enrollment')], limit=1)
             for vals in vals_list:
                 if vals.get('code', 'New') == 'New':
-                    vals['code'] = sequence._next() if sequence else 'New'
+                    vals['code'] = self.env['ir.sequence'].next_by_code('university.enrollment') or 'New'
+        return super().create(vals_list)
 
-        return super(Enrollment, self).create(vals_list)
 
 # Grade
 class Grade(models.Model):
-    """
-    Architectural entity representing a Grade.
-
-    Stores the score achieved by a student for a specific enrollment.
-    """
     _name = 'university.grade'
     _description = 'Grade'
 
-    # === RELATIONAL FIELDS ===
-    enrollment_id = fields.Many2one(
-        comodel_name='university.enrollment',
-        string='Enrollment',
-        required=True,
-        index=True,
-        help="Enrollment record this grade belongs to."
-    )
+    enrollment_id = fields.Many2one('university.enrollment', string='Enrollment', required=True, index=True)
     student_id = fields.Many2one(
-        comodel_name='university.student',
-        related='enrollment_id.student_id',
-        string='Student',
-        store=True,
-        index=True,
-        help="Student receiving the grade."
+        'university.student', related='enrollment_id.student_id', 
+        store=True, index=True
     )
 
-    # === CORE FIELDS ===
-    score = fields.Float(
-        string='Score',
-        index=True,
-        help="Academic score."
-    )
-    date = fields.Date(
-        string='Date',
-        default=fields.Date.context_today,
-        help="Date the grade was recorded."
-    )
+    score = fields.Float(string='Score', index=True)
+    date = fields.Date(string='Date', default=fields.Date.context_today)
 
+    @api.depends('student_id.name', 'score')
     def _compute_display_name(self) -> None:
-        """
-        Compute the display name for the grade.
-        Format: [Student Name] - [Score]
-        """
         for record in self:
-            record.display_name = f"{record.student_id.name} - {record.score}"
+            record.display_name = f"{record.student_id.name or ''} - {record.score or 0.0}"

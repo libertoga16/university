@@ -14,7 +14,7 @@ class University(models.Model):
     students). It provides aggregate statistics and navigation to related sub-entities.
     """
     _name = 'university.university'
-    _inherit = ['image.mixin', 'batch.count.mixin']
+    _inherit = ['image.mixin', 'batch.count.mixin', 'website.published.mixin', 'website.seo.metadata']
     _description = 'University'
 
     #CORE FIELDS

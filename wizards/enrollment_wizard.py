@@ -60,32 +60,35 @@ class EnrollmentWizard(models.TransientModel):
 
     def action_enroll(self) -> Dict[str, Any]:
         """
-        Create enrollments for selected students.
-
-        Performs a bulk create operation for performance optimization.
+        Create enrollments for selected students, preventing duplicates.
         """
         self.ensure_one()
-
         if not self.student_ids:
             return {'type': 'ir.actions.act_window_close'}
 
-        # Architectural Decision: Bulk Creation.
-        # Construct a list of dictionaries to perform a single DB insert for all enrollments.
-        vals_list: List[Dict[str, Any]] = [
-            {
-                'student_id': student.id,
-                'university_id': self.university_id.id,
-                'subject_id': self.subject_id.id,
-                'professor_id': self.professor_id.id if self.professor_id else False,
-            }
-            for student in self.student_ids
-        ]
+        # Obtener IDs de alumnos que ya están inscritos en esta materia
+        existing_enrollments = self.env['university.enrollment'].search([
+            ('subject_id', '=', self.subject_id.id),
+            ('student_id', 'in', self.student_ids.ids)
+        ])
+        enrolled_student_ids = existing_enrollments.mapped('student_id.id')
 
-        # Use batch create
+        # Filtrar solo los alumnos que NO están inscritos
+        valid_students = self.student_ids.filtered(lambda s: s.id not in enrolled_student_ids)
+
+        if not valid_students:
+            # Opción: Lanzar ValidationError o simplemente retornar
+            raise ValidationError(_("Todos los alumnos seleccionados ya están inscritos en esta asignatura."))
+
+        vals_list = [{
+            'student_id': student.id,
+            'university_id': self.university_id.id,
+            'subject_id': self.subject_id.id,
+            'professor_id': self.professor_id.id if self.professor_id else False,
+        } for student in valid_students]
+
         enrollments = self.env['university.enrollment'].create(vals_list)
-
-        _logger.info("Batch created %d enrollments via wizard.", len(enrollments))
-
+        
         return {
             'name': _('Created Enrollments'),
             'type': 'ir.actions.act_window',

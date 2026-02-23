@@ -27,6 +27,7 @@ Key Features:
         'base',
         'mail',
         'website',
+        'portal',
     ],
     'data': [
         'security/ir.model.access.csv',

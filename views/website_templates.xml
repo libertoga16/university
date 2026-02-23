@@ -11,7 +11,7 @@
                                 <div class="card h-100 shadow-sm border-0 transition-hover">
                                     <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 250px; overflow: hidden;">
                                         <img t-if="uni.image_1920" 
-                                             t-att-src="image_data_uri(uni.image_1920)" 
+                                             t-attf-src="/web/image/university.university/#{uni.id}/image_1920" 
                                              class="img-fluid" 
                                              style="max-height: 100%; max-width: 100%; object-fit: contain;" 
                                              alt="University Image"/>
@@ -43,7 +43,7 @@
                             <div class="card h-100 border-0 shadow-sm">
                                 <div class="card-img-top d-flex align-items-center justify-content-center bg-white pt-4 pb-2">
                                     <img t-if="prof.image_128" 
-                                         t-att-src="image_data_uri(prof.image_128)" 
+                                         t-attf-src="/web/image/university.professor/#{prof.id}/image_128" 
                                          class="rounded-circle shadow-sm" 
                                          style="width: 120px; height: 120px; object-fit: cover;"
                                          alt="Professor Image"/>

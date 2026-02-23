@@ -72,11 +72,11 @@ class UniversityReport(models.Model):
                     d.id AS department_id,
                     s.id AS student_id,
                     sub.id AS subject_id,
-                    g.score AS score
+                    COALESCE(g.score, 0.0) AS score
                 FROM
-                    university_grade g
-                JOIN
-                    university_enrollment e ON g.enrollment_id = e.id
+                    university_enrollment e
+                LEFT JOIN
+                    university_grade g ON g.enrollment_id = e.id
                 JOIN
                     university_student s ON e.student_id = s.id
                 JOIN
