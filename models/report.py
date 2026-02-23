@@ -96,3 +96,35 @@ class UniversityReport(models.Model):
                     university_department d ON p.department_id = d.id
             )
         """ % (self._table))
+
+
+class StudentReportParser(models.AbstractModel):
+    # El nombre debe ser "report." + nombre_del_modulo + . + id_del_template
+    _name = 'report.university.report_student_template'
+    _description = 'Student Report Parser'
+
+    @api.model
+    def _get_report_values(self, docids, data=None):
+        docs = self.env['university.student'].browse(docids)
+        
+        # Obtenemos TODOS los promedios de TODOS los alumnos en 1 sola query SQL
+        groups = self.env['university.grade']._read_group(
+            domain=[('student_id', 'in', docids)],
+            groupby=['student_id', 'enrollment_id'],
+            aggregates=['score:avg']
+        )
+        
+        # Mapeamos en memoria
+        summary_by_student = {doc_id: [] for doc_id in docids}
+        for student, enrollment, avg_score in groups:
+            summary_by_student[student.id].append({
+                'subject': enrollment.subject_id.name,
+                'professor': enrollment.professor_id.name or 'N/A',
+                'average': avg_score or 0.0
+            })
+            
+        # Inyectamos el diccionario pre-calculado al QWeb
+        return {
+            'docs': docs,
+            'student_summaries': summary_by_student,
+        }

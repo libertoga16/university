@@ -94,20 +94,34 @@ class UniversityStudent(models.Model):
             
         portal_group_id = portal_group.id
         
-        students_to_link = students.filtered(lambda s: s.email and not s.user_id)
-        if students_to_link:
-            user_vals = [{
-                'name': s.name,
-                'login': s.email,
-                'email': s.email,
-                'groups_id': [(6, 0, [portal_group_id])],
-            } for s in students_to_link]
+        valid_students = students.filtered(lambda s: s.email and not s.user_id)
+        if not valid_students:
+            return students
             
-            users = self.env['res.users'].sudo().create(user_vals)
-            users_by_email = {u.email: u for u in users}
-            for student in students_to_link:
-                if student.email in users_by_email:
-                    student.user_id = users_by_email[student.email].id
+        unique_emails = set(valid_students.mapped('email'))
+
+        # 3. Buscar si algún usuario ya tiene este login en la BD
+        existing_users = self.env['res.users'].sudo().search([('login', 'in', list(unique_emails))])
+        existing_logins = set(existing_users.mapped('login'))
+        
+        # 4. Determinar qué correos realmente necesitan creación
+        emails_to_create = unique_emails - existing_logins
+        new_users = self.env['res.users'].sudo() # Recordset vacío por defecto
+        
+        if emails_to_create:
+            user_vals = [{
+                'name': email.split('@')[0], 
+                'login': email,
+                'email': email,
+                'groups_id': [(6, 0, [portal_group_id])],
+            } for email in emails_to_create]
+            new_users = self.env['res.users'].sudo().create(user_vals)
+            
+        # 5. Mapeo absoluto SIN golpear la base de datos de nuevo (Fusión de Recordsets)
+        user_map = {u.login: u.id for u in (existing_users | new_users)}
+        
+        for student in valid_students:
+            student.user_id = user_map.get(student.email, False)
                     
         return students
   
@@ -200,24 +214,7 @@ class UniversityStudent(models.Model):
                 # Opcional, pero nivel Senior: dejar rastro en el historial del alumno
                 student.message_post(body=error_msg, message_type='comment')
 
-    def get_subject_summary(self):
-        self.ensure_one()
-        
-        # Optimized via DB aggregation instead of Python loops
-        groups = self.env['university.grade']._read_group(
-            domain=[('student_id', '=', self.id)],
-            groupby=['enrollment_id'],
-            aggregates=['score:avg']
-        )
-        
-        summary = []
-        for enrollment, avg_score in groups:
-            summary.append({
-                'subject': enrollment.subject_id.name,
-                'professor': enrollment.professor_id.name or 'N/A',
-                'average': avg_score or 0.0
-            })
-        return summary
+
 
 class ResUsers(models.Model):
     _inherit = 'res.users'

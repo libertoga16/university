@@ -5,6 +5,7 @@ import { useService } from "@web/core/utils/hooks";
 import { Component, xml } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
 import { _t } from "@web/core/l10n/translation"; // Obligatorio para Odoo
+import { sprintf } from "@web/core/utils/strings";
 
 export class StudentEmailWidget extends Component {
     static template = xml`
@@ -46,7 +47,7 @@ export class StudentEmailWidget extends Component {
 
             if (result) {
                 this.notification.add(
-                    _t("An email with the grades has been sent to ") + result,
+                    sprintf(_t("An email with the grades has been sent to %s."), result),
                     { type: "success" }
                 );
             }

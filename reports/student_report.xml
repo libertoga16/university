@@ -78,7 +78,7 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr t-foreach="o.get_subject_summary()" t-as="summary" class="align-middle border-bottom">
+                                        <tr t-foreach="student_summaries.get(o.id, [])" t-as="summary" class="align-middle border-bottom">
                                             <td class="py-3 px-4 fw-bold text-dark"><span t-out="summary['subject']"/></td>
                                             <td class="py-3 px-4 text-secondary"><span t-out="summary['professor']"/></td>
                                             <td class="py-3 px-4 text-center">
@@ -88,7 +88,7 @@
                                                 </span>
                                             </td>
                                         </tr>
-                                        <tr t-if="not o.get_subject_summary()">
+                                        <tr t-if="not student_summaries.get(o.id, [])">
                                             <td colspan="3" class="text-center py-4 text-muted fst-italic">No subjects registered for this student.</td>
                                         </tr>
                                     </tbody>
