@@ -33,7 +33,12 @@ export class StudentEmailWidget extends Component {
 
         try {
             if (this.props.record.isDirty) {
-                await this.props.record.save();
+                const saved = await this.props.record.save();
+                // Si la validación de Odoo detuvo el guardado, abortamos silenciosamente
+                if (!saved) {
+                    this.notification.add("Por favor, corrige los errores del formulario antes de enviar el reporte.", { type: "danger" });
+                    return;
+                }
             }
 
             const recordId = this.props.record.resId;
