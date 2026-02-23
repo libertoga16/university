@@ -88,41 +88,27 @@ class UniversityStudent(models.Model):
         students = super().create(vals_list)
         portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
         
+        # NO TE TRAGUES EL ERROR. Si falla la configuración, detén el sistema.
         if not portal_group:
             raise UserError(_("Critical Error: 'base.group_portal' is missing. The system cannot provision portal users."))
+            
         portal_group_id = portal_group.id
-
-        # 1. Filtrar estudiantes que necesitan usuario
-        valid_students = students.filtered(lambda s: s.email and not s.user_id)
-        if not valid_students:
-            return students
-
-        # 2. Extraer correos ÚNICOS matemáticamente
-        unique_emails = set(valid_students.mapped('email'))
         
-        # 3. Buscar si algún usuario ya tiene este login en la BD (Prevenir UniqueViolation)
-        existing_users = self.env['res.users'].sudo().search([('login', 'in', list(unique_emails))])
-        existing_logins = set(existing_users.mapped('login'))
-        
-        # 4. Determinar qué correos realmente necesitan creación
-        emails_to_create = unique_emails - existing_logins
-        if emails_to_create:
+        students_to_link = students.filtered(lambda s: s.email and not s.user_id)
+        if students_to_link:
             user_vals = [{
-                'name': email.split('@')[0], # Nombre temporal a partir del correo
-                'login': email,
-                'email': email,
+                'name': s.name,
+                'login': s.email,
+                'email': s.email,
                 'groups_id': [(6, 0, [portal_group_id])],
-            } for email in emails_to_create]
-            self.env['res.users'].sudo().create(user_vals)
+            } for s in students_to_link]
             
-        # 5. Mapeo absoluto. Volvemos a buscar todos los usuarios implicados (nuevos y viejos)
-        all_users = self.env['res.users'].sudo().search([('login', 'in', list(unique_emails))])
-        user_map = {u.login: u.id for u in all_users}
-        
-        # 6. Asignar de forma segura tolerando colisiones (varios alumnos al mismo usuario)
-        for student in valid_students:
-            student.user_id = user_map.get(student.email, False)
-            
+            users = self.env['res.users'].sudo().create(user_vals)
+            users_by_email = {u.email: u for u in users}
+            for student in students_to_link:
+                if student.email in users_by_email:
+                    student.user_id = users_by_email[student.email].id
+                    
         return students
   
     @api.depends('enrollment_ids', 'grade_ids')
@@ -138,7 +124,7 @@ class UniversityStudent(models.Model):
         self.ensure_one()
         template = self.env.ref('university.email_template_student_report', raise_if_not_found=False)
         return {
-            'name': 'Send Report',
+            'name': _('Send Report'), # EN INGLÉS
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'mail.compose.message',
@@ -162,11 +148,10 @@ class UniversityStudent(models.Model):
         template = self.env.ref('university.email_template_student_report')
         report_action = self.env.ref('university.action_report_student')
         
-        # LLAMADA CORRECTA A LA API DE ODOO 19
         pdf_content, _ = report_action._render_qweb_pdf(self.ids)
         
         attachment = self.env['ir.attachment'].create({
-            'name': f"Report_{self.name.replace(' ', '_')}.pdf",
+            'name': f"Report_{self.name.replace(' ', '_')}.pdf", # EN INGLÉS
             'type': 'binary',
             'datas': base64.b64encode(pdf_content),
             'res_model': 'university.student',

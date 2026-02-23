@@ -29,15 +29,14 @@ class UniversityPortal(CustomerPortal):
         user = request.env.user
         student = request.env['university.student'].sudo().search([('user_id', '=', user.id)], limit=1)
         
-        # Cumplimiento estricto: Si no hay estudiante, bloquear y redirigir al inicio del portal
         if not student:
             return request.redirect('/my')
 
         values = self._prepare_portal_layout_values()
         grade_obj = request.env['university.grade']
         
-        # Defensa en Profundidad: Imposición estricta del dominio relacional
-        domain = [('student_id', '=', student.id)]
+        # SEGURIDAD ABSOLUTA: El controlador DEBE imponer el dominio, independientemente del ir.rule
+        domain = [('student_id', '=', student.id)] 
 
         searchbar_sortings = {
             'date': {'label': _('Date'), 'order': 'date desc'},

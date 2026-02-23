@@ -16,7 +16,6 @@
             <t t-foreach="docs" t-as="o">
                 <t t-call="web.external_layout">
                     <div class="page" style="font-family: 'Inter', 'Roboto', sans-serif; color: #333;">
-                        <!-- Header Section -->
                         <div class="row align-items-center mb-5 pb-3 border-bottom border-2 border-primary">
                             <div class="col-8">
                                 <h1 class="text-primary fw-bold mb-0" style="font-size: 2.5rem; letter-spacing: -0.5px;">Academic Report</h1>
@@ -32,7 +31,6 @@
                             </div>
                         </div>
                         
-                        <!-- Student Info Card -->
                         <div class="row mb-5">
                             <div class="col-12">
                                 <div class="card border-0 shadow-sm rounded-4" style="background-color: #f8f9fa;">
@@ -64,11 +62,10 @@
                             </div>
                         </div>
 
-                        <!-- Summary Table Section -->
                         <div class="mb-5">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-primary text-white rounded px-3 py-1 me-3 fw-bold fs-5 shadow-sm">1</div>
-                                <h3 class="mb-0 text-dark fw-bold" style="letter-spacing: -0.5px;">Summary by Subject</h3>
+                                <h3 class="mb-0 text-dark fw-bold" style="letter-spacing: -0.5px;">Subject Summary</h3>
                             </div>
                             
                             <div class="table-responsive rounded-3 overflow-hidden shadow-sm border">
@@ -99,7 +96,6 @@
                             </div>
                         </div>
 
-                        <!-- Full History Section -->
                         <div class="mt-4 break-inside-avoid">
                             <div class="d-flex align-items-center mb-3">
                                 <div class="bg-primary text-white rounded px-3 py-1 me-3 fw-bold fs-5 shadow-sm">2</div>
@@ -113,7 +109,7 @@
                                             <th class="py-3 px-4">Date</th>
                                             <th class="py-3 px-4">Subject</th>
                                             <th class="py-3 px-4">Evaluating Professor</th>
-                                            <th class="py-3 px-4 text-end">Score</th>
+                                            <th class="py-3 px-4 text-end">Grade</th>
                                         </tr>
                                     </thead>
                                     <tbody style="border-top: none;">
@@ -135,9 +131,8 @@
                             </div>
                         </div>
                         
-                        <!-- Footer Branding -->
                         <div class="mt-5 pt-4 text-center border-top">
-                            <p class="text-muted small mb-0">Document generated automatically by the academic management system.</p>
+                            <p class="text-muted small mb-0">Document generated automatically by the Academic Management System.</p>
                             <p class="fw-bold text-primary small mt-1"><span t-field="o.university_id.name"/></p>
                         </div>
                     </div>
