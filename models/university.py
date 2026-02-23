@@ -59,6 +59,11 @@ class University(models.Model):
     )
 
     # RELATIONAL FIELDS 
+    director_id = fields.Many2one(
+        comodel_name='university.professor',
+        string='Director',
+        help="Director de la universidad."
+    )
     professor_ids = fields.One2many(
         comodel_name='university.professor',
         inverse_name='university_id',

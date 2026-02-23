@@ -26,6 +26,13 @@ class UniversityPortal(CustomerPortal):
 
     @http.route(['/my/grades', '/my/grades/page/<int:page>'], type='http', auth="user", website=True)
     def portal_my_grades(self, page=1, sortby='date', **kw):
+        user = request.env.user
+        student = request.env['university.student'].sudo().search([('user_id', '=', user.id)], limit=1)
+        
+        # Cumplimiento estricto: Si no hay estudiante, bloquear y redirigir al inicio del portal
+        if not student:
+            return request.redirect('/my')
+
         values = self._prepare_portal_layout_values()
         grade_obj = request.env['university.grade']
         

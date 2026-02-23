@@ -120,16 +120,23 @@ class UniversityStudent(models.Model):
             record.grade_count = grade_map.get(record.id, 0)
 
     def action_send_email(self) -> Dict[str, Any]:
-        self.write({'report_pending': True})
+        self.ensure_one()
+        template = self.env.ref('university.email_template_student_report', raise_if_not_found=False)
         return {
-            'type': 'ir.actions.client',
-            'tag': 'display_notification',
-            'params': {
-                'title': 'Report Queued',
-                'message': 'The academic report is being generated and will be sent shortly.',
-                'type': 'success',
-                'sticky': False,
-            }
+            'name': 'Enviar Reporte',
+            'type': 'ir.actions.act_window',
+            'view_mode': 'form',
+            'res_model': 'mail.compose.message',
+            'views': [(False, 'form')],
+            'view_id': False,
+            'target': 'new',
+            'context': {
+                'default_model': 'university.student',
+                'default_res_ids': self.ids,
+                'default_template_id': template.id if template else False,
+                'default_composition_mode': 'comment',
+                'force_email': True,
+            },
         }
 
     def action_send_email_silent_js(self) -> str | bool:

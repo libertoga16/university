@@ -26,6 +26,7 @@
                         <group name="main_info">
                             <field name="name"/>
                             <field name="email" widget="email"/>
+                            <field name="director_id"/>
                         </group>
                         <group name="address_info">
                             <label for="street" string="Address"/>

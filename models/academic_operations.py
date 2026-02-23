@@ -60,12 +60,26 @@ class Enrollment(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list: List[Dict[str, Any]]) -> Any:
-        # Standard approach: Utilize ir.sequence explicitly for batch creation.
-        # Calling private methods like `sequence._next()` is bad practice in Odoo 19.
-        if not self.env.context.get('skip_sequence_generation'):
-            for vals in vals_list:
-                if vals.get('code', 'New') == 'New':
-                    vals['code'] = self.env['ir.sequence'].next_by_code('university.enrollment') or 'New'
+        for vals in vals_list:
+            if vals.get('code', 'New') == 'New' and vals.get('subject_id'):
+                subject = self.env['university.subject'].browse(vals['subject_id'])
+                # Primeras 3 letras en mayúsculas (fallback a UNK si no hay nombre)
+                prefix_str = (subject.name[:3].upper() if subject.name else 'UNK')
+                year_str = str(fields.Date.today().year)
+                prefix = f"{prefix_str}/{year_str}/"
+                
+                # Buscar secuencia específica de la asignatura o crearla
+                seq_code = f"enrollment.subject.{subject.id}"
+                seq = self.env['ir.sequence'].sudo().search([('code', '=', seq_code)], limit=1)
+                if not seq:
+                    seq = self.env['ir.sequence'].sudo().create({
+                        'name': f'Secuencia Matrícula {subject.name}',
+                        'code': seq_code,
+                        'prefix': prefix,
+                        'padding': 4,
+                        'company_id': False,
+                    })
+                vals['code'] = seq.next_by_id()
         return super().create(vals_list)
 
 

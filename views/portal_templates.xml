@@ -3,19 +3,22 @@
     <!-- Portal Home: Add "Notas" tile -->
     <template id="portal_my_home_university" name="Show Grades" inherit_id="portal.portal_my_home" priority="40">
         <xpath expr="//div[hasclass('o_portal_docs')]" position="inside">
-            <!-- Custom Styled "Notas" Tile -->
-            <a t-if="grade_count" href="/my/grades" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-3 border-0 shadow-sm mb-2 rounded mt-2">
-                <div class="d-flex align-items-center">
-                    <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
-                        <i class="fa fa-graduation-cap fa-xl"/>
+            <t t-set="is_student" t-value="request.env['university.student'].sudo().search_count([('user_id', '=', request.env.user.id)]) &gt; 0"/>
+            <t t-if="is_student">
+                <!-- Custom Styled "Notas" Tile -->
+                <a href="/my/grades" class="list-group-item list-group-item-action d-flex align-items-center justify-content-between p-3 border-0 shadow-sm mb-2 rounded mt-2">
+                    <div class="d-flex align-items-center">
+                        <div class="bg-primary bg-opacity-10 text-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 48px; height: 48px;">
+                            <i class="fa fa-graduation-cap fa-xl"/>
+                        </div>
+                        <div>
+                            <h5 class="mb-0 fw-bold text-dark">Notas</h5>
+                            <div class="small text-muted">Historial académico y calificaciones</div>
+                        </div>
                     </div>
-                    <div>
-                        <h5 class="mb-0 fw-bold text-dark">Notas</h5>
-                        <div class="small text-muted">Historial académico y calificaciones</div>
-                    </div>
-                </div>
-                <span class="badge bg-secondary rounded-pill" t-out="grade_count"/>
-            </a>
+                    <span class="badge bg-secondary rounded-pill" t-out="grade_count or 0"/>
+                </a>
+            </t>
         </xpath>
     </template>
 
