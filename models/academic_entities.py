@@ -13,9 +13,10 @@ class Department(models.Model):
     _description = 'Department'
 
     name = fields.Char(string='Name', required=True, index=True, help="Name of the department.")
-    university_id = fields.Many2one('university.university', string='University', required=True, index=True)
-    manager_id = fields.Many2one('university.professor', string='Manager', index=True)
+    university_id = fields.Many2one('university.university', string='University', required=True, index=True, check_company=True)
+    manager_id = fields.Many2one('university.professor', string='Manager', index=True, check_company=True)
     professor_ids = fields.One2many('university.professor', 'department_id', string='Professors')
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
     professor_count = fields.Integer(compute='_compute_counts', string='Professor Count')
 
@@ -35,9 +36,10 @@ class UniversityProfessor(models.Model):
     name = fields.Char(string='Name', required=True, index=True)
     email = fields.Char(string='Email', index=True)
     
-    university_id = fields.Many2one('university.university', string='University', required=True, index=True)
-    department_id = fields.Many2one('university.department', string='Department', required=True, index=True)
+    university_id = fields.Many2one('university.university', string='University', required=True, index=True, check_company=True)
+    department_id = fields.Many2one('university.department', string='Department', required=True, index=True, check_company=True)
     subject_ids = fields.Many2many('university.subject', string='Subjects')
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     enrollment_ids = fields.One2many('university.enrollment', 'professor_id', string='Enrollments')
 
     enrollment_count = fields.Integer(compute='_compute_counts', string='Enrollment Count')
@@ -58,8 +60,9 @@ class UniversityStudent(models.Model):
     name = fields.Char(string='Name', required=True)
     email = fields.Char(string='Email')
     
-    university_id = fields.Many2one('university.university', string='University')
-    tutor_id = fields.Many2one('university.professor', string='Tutor')
+    university_id = fields.Many2one('university.university', string='University', check_company=True)
+    tutor_id = fields.Many2one('university.professor', string='Tutor', check_company=True)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     
     enrollment_ids = fields.One2many('university.enrollment', 'student_id', string='Enrollments')
     grade_ids = fields.One2many('university.grade', 'student_id', string='Grades')
@@ -179,7 +182,7 @@ class UniversityStudent(models.Model):
                 
                 template.send_mail(
                     student.id, 
-                    force_send=True,
+                    force_send=False, # NUNCA fuerces el envío dentro de un bucle cron (evita SMTP timeout)
                     email_values={'attachment_ids': [(4, attachment.id)]}
                 )
                 student.report_pending = False

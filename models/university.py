@@ -17,7 +17,6 @@ class University(models.Model):
     _inherit = ['image.mixin', 'batch.count.mixin', 'website.published.mixin', 'website.seo.metadata']
     _description = 'University'
 
-    #CORE FIELDS
     name = fields.Char(
         string='Name',
         required=True,
@@ -27,6 +26,10 @@ class University(models.Model):
     email = fields.Char(
         string='Email',
         help="University email address."
+    )
+    company_id = fields.Many2one(
+        'res.company', string='Company', 
+        required=True, default=lambda self: self.env.company
     )
 
     #ADDRESS FIELDS 

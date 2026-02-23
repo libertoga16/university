@@ -14,13 +14,14 @@ class Subject(models.Model):
     name = fields.Char(string='Name', required=True, index=True)
     code = fields.Char(string='Code', required=True, index=True)
 
-    department_id = fields.Many2one('university.department', string='Department', required=True, index=True)
+    department_id = fields.Many2one('university.department', string='Department', required=True, index=True, check_company=True)
     university_id = fields.Many2one(
         'university.university', related='department_id.university_id', 
-        store=True, readonly=True, index=True
+        store=True, readonly=True, index=True, check_company=True
     )
     professor_ids = fields.Many2many('university.professor', string='Professors')
     enrollment_ids = fields.One2many('university.enrollment', 'subject_id', string='Enrollments')
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
     enrollment_count = fields.Integer(compute='_compute_counts', string='Enrollment Count')
 
@@ -39,16 +40,17 @@ class Enrollment(models.Model):
 
     code = fields.Char(string='Code', required=True, default='New', copy=False, index=True)
 
-    student_id = fields.Many2one('university.student', string='Student', required=True, index=True)
-    university_id = fields.Many2one('university.university', string='University', required=True, index=True)
-    professor_id = fields.Many2one('university.professor', string='Professor', index=True)
-    subject_id = fields.Many2one('university.subject', string='Subject', required=True, index=True)
+    student_id = fields.Many2one('university.student', string='Student', required=True, index=True, check_company=True)
+    university_id = fields.Many2one('university.university', string='University', required=True, index=True, check_company=True)
+    professor_id = fields.Many2one('university.professor', string='Professor', index=True, check_company=True)
+    subject_id = fields.Many2one('university.subject', string='Subject', required=True, index=True, check_company=True)
     grade_ids = fields.One2many('university.grade', 'enrollment_id', string='Grades')
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
     _sql_constraints = [
         ('unique_student_subject', 
          'UNIQUE(student_id, subject_id)', 
-         'Integrity Error: Un estudiante no puede estar matriculado más de una vez en la misma asignatura.')
+         'Integrity Error: A student cannot be enrolled more than once in the same subject.')
     ]
 
     @api.depends('code', 'student_id.name')
@@ -72,14 +74,15 @@ class Grade(models.Model):
     _name = 'university.grade'
     _description = 'Grade'
 
-    enrollment_id = fields.Many2one('university.enrollment', string='Enrollment', required=True, index=True)
+    enrollment_id = fields.Many2one('university.enrollment', string='Enrollment', required=True, index=True, check_company=True)
     student_id = fields.Many2one(
         'university.student', related='enrollment_id.student_id', 
-        store=True, index=True
+        store=True, index=True, check_company=True
     )
 
     score = fields.Float(string='Score', index=True)
     date = fields.Date(string='Date', default=fields.Date.context_today)
+    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
     @api.depends('student_id.name', 'score')
     def _compute_display_name(self) -> None:

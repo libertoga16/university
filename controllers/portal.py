@@ -17,7 +17,8 @@ class UniversityPortal(CustomerPortal):
             student = request.env['university.student'].search([('user_id', '=', user.id)], limit=1)
             
             if student:
-                values['grade_count'] = len(student.grade_ids)
+                # OPTIMIZADO: Ejecuta un SELECT COUNT() en SQL. Cero impacto en RAM.
+                values['grade_count'] = request.env['university.grade'].search_count([('student_id', '=', student.id)])
             else:
                  values['grade_count'] = 0
                  

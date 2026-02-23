@@ -48,5 +48,48 @@
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
+
+        <!-- Reglas Multi-compañía para Usuarios Internos -->
+        <record id="rule_university_company" model="ir.rule">
+            <field name="name">University Multi-Company</field>
+            <field name="model_id" ref="model_university_university"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_department_company" model="ir.rule">
+            <field name="name">Department Multi-Company</field>
+            <field name="model_id" ref="model_university_department"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_professor_company" model="ir.rule">
+            <field name="name">Professor Multi-Company</field>
+            <field name="model_id" ref="model_university_professor"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_student_company" model="ir.rule">
+            <field name="name">Student Multi-Company</field>
+            <field name="model_id" ref="model_university_student"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_subject_company" model="ir.rule">
+            <field name="name">Subject Multi-Company</field>
+            <field name="model_id" ref="model_university_subject"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_enrollment_company" model="ir.rule">
+            <field name="name">Enrollment Multi-Company</field>
+            <field name="model_id" ref="model_university_enrollment"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
+
+        <record id="rule_grade_company" model="ir.rule">
+            <field name="name">Grade Multi-Company</field>
+            <field name="model_id" ref="model_university_grade"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+        </record>
     </data>
 </odoo>

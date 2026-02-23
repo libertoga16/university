@@ -16,6 +16,10 @@ class UniversityWebsite(http.Controller):
     # Usamos el convertidor de URL <model(...)> para obtener el objeto directamente
     @http.route('/universidad/<model("university.university"):uni>', auth='public', website=True)
     def list_professors(self, uni, **kw):
+        # Bloquear acceso si la universidad no está publicada y el usuario es externo
+        if not request.env.user.has_group('base.group_user') and not uni.is_published:
+            return request.not_found()
+
         # El usuario interno ve a todos; el público solo a los publicados.
         if request.env.user.has_group('base.group_user'):
             professors = uni.professor_ids
