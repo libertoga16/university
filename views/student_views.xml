@@ -23,7 +23,11 @@
                     <group>
                         <group name="personal_info">
                             <field name="name"/>
-                            <field name="email" widget="email"/>
+                            <label for="email" string="Correo electrónico"/>
+                            <div class="o_row">
+                                <field name="email" widget="email"/>
+                                <widget name="student_send_email"/>
+                            </div>
                         </group>
                         <group name="academic_info">
                             <field name="university_id"/>

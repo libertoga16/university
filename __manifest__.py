@@ -52,6 +52,11 @@ Key Features:
     'demo': [
         'demo/demo_data.xml',
     ],
+    'assets': {
+        'web.assets_backend': [
+            'university/static/src/js/student_email_widget.js',
+        ],
+    },
     'installable': True,
     'application': True,
     'auto_install': False,

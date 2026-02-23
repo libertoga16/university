@@ -261,6 +261,41 @@ class UniversityStudent(models.Model):
                 'sticky': False,
             }
         }
+
+    def action_send_email_silent_js(self) -> str | bool:
+        """
+        Genera el PDF y envía el correo en segundo plano sin intervención del usuario.
+        Devuelve el email de destino para la notificación de JS.
+        
+        Returns:
+            str | bool: El email de destino si es exitoso, False si no hay email vinculado.
+        """
+        self.ensure_one()
+        
+        if not self.email:
+            return False
+
+        template = self.env.ref('university.email_template_student_report')
+        report_action = self.env.ref('university.action_report_student')
+        
+        pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(report_action, self.ids)
+        
+        attachment = self.env['ir.attachment'].create({
+            'name': f"Informe_{self.name.replace(' ', '_')}.pdf",
+            'type': 'binary',
+            'datas': base64.b64encode(pdf_content),
+            'res_model': 'university.student',
+            'res_id': self.id,
+            'mimetype': 'application/pdf',
+        })
+        
+        template.send_mail(
+            self.id, 
+            force_send=True, 
+            email_values={'attachment_ids': [(4, attachment.id)]}
+        )
+        
+        return self.email
         
     @api.model
     def _cron_process_pending_reports(self) -> None:
@@ -289,8 +324,9 @@ class UniversityStudent(models.Model):
                 })
                 
                 # Send Mail
-                template.with_context(force_email=True).send_mail(
+                template.send_mail(
                     student.id, 
+                    force_send=True,
                     email_values={'attachment_ids': [(4, attachment.id)]}
                 )
                 
@@ -318,3 +354,43 @@ class UniversityStudent(models.Model):
                 'average': avg_score
             })
         return summary
+
+
+class ResUsers(models.Model):
+    _inherit = 'res.users'
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """
+        Al crear un nuevo usuario (portal o interno), buscar si hay algún estudiante
+        con el mismo email y vincularlo automáticamente para que recupere sus notas pasadas.
+        """
+        users = super().create(vals_list)
+        for user in users:
+            emails_to_check = [e for e in [user.login, user.email] if e]
+            if emails_to_check:
+                students = self.env['university.student'].sudo().search([
+                    ('email', 'in', emails_to_check),
+                    ('user_id', '=', False)
+                ])
+                if students:
+                    students.write({'user_id': user.id})
+        return users
+
+    def write(self, vals):
+        """
+        Si se actualiza el email/login de un usuario existente, intentar vincular
+        estudiantes huérfanos que coincidan.
+        """
+        res = super().write(vals)
+        if 'login' in vals or 'email' in vals:
+            for user in self:
+                emails_to_check = [e for e in [user.login, user.email] if e]
+                if emails_to_check:
+                    students = self.env['university.student'].sudo().search([
+                        ('email', 'in', emails_to_check),
+                        ('user_id', '=', False)
+                    ])
+                    if students:
+                        students.write({'user_id': user.id})
+        return res

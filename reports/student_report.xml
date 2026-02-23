@@ -15,61 +15,131 @@
         <t t-call="web.html_container">
             <t t-foreach="docs" t-as="o">
                 <t t-call="web.external_layout">
-                    <div class="page">
-                        <h2 class="text-center mt-4">Informe Académico</h2>
-                        
-                        <div class="row mt-4 mb-4" style="border: 1px solid #ccc; padding: 15px;">
-                            <div class="col-6">
-                                <strong>Alumno:</strong> <span t-field="o.name"/><br/>
-                                <strong>Dirección:</strong><br/>
-                                <span t-field="o.street"/><br/>
-                                <span t-field="o.city"/>, <span t-field="o.zip_code"/>
+                    <div class="page" style="font-family: 'Inter', 'Roboto', sans-serif; color: #333;">
+                        <!-- Header Section -->
+                        <div class="row align-items-center mb-5 pb-3 border-bottom border-2 border-primary">
+                            <div class="col-8">
+                                <h1 class="text-primary fw-bold mb-0" style="font-size: 2.5rem; letter-spacing: -0.5px;">Informe Académico</h1>
+                                <p class="text-muted fs-5 mt-2 mb-0">Expediente Oficial del Estudiante</p>
                             </div>
-                            <div class="col-6 text-end">
-                                <strong>Universidad:</strong> <span t-field="o.university_id.name"/><br/>
+                            <div class="col-4 text-end">
                                 <t t-if="o.university_id.image_1920">
-                                    <img t-att-src="image_data_uri(o.university_id.image_1920)" style="max-height: 80px;"/>
+                                    <img t-att-src="image_data_uri(o.university_id.image_1920)" style="max-height: 90px; object-fit: contain;" class="rounded shadow-sm"/>
+                                </t>
+                                <t t-else="">
+                                    <div class="h3 text-secondary fw-bold mt-3"><span t-field="o.university_id.name"/></div>
                                 </t>
                             </div>
                         </div>
+                        
+                        <!-- Student Info Card -->
+                        <div class="row mb-5">
+                            <div class="col-12">
+                                <div class="card border-0 shadow-sm rounded-4" style="background-color: #f8f9fa;">
+                                    <div class="card-body p-4">
+                                        <div class="row">
+                                            <div class="col-6 border-end">
+                                                <h5 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.85rem; letter-spacing: 1px;">Datos del Alumno</h5>
+                                                <h3 class="fw-bold text-dark mb-1"><span t-field="o.name"/></h3>
+                                                <div class="text-secondary mb-2">
+                                                    <i class="fa fa-envelope me-2"></i><span t-field="o.email" t-if="o.email"/>
+                                                    <span t-if="not o.email">Sin email registrado</span>
+                                                </div>
+                                                <div class="text-secondary mt-3">
+                                                    <strong>Tutor Asignado:</strong> <span t-field="o.tutor_id.name" t-if="o.tutor_id"/>
+                                                    <span t-if="not o.tutor_id" class="fst-italic text-muted">No asignado</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-6 ps-4">
+                                                <h5 class="text-uppercase text-muted fw-bold mb-3" style="font-size: 0.85rem; letter-spacing: 1px;">Universidad &amp; Ubicación</h5>
+                                                <div class="fw-bold fs-5 text-dark mb-1"><span t-field="o.university_id.name"/></div>
+                                                <div class="text-secondary">
+                                                    <span t-field="o.street"/><br/>
+                                                    <span t-field="o.city"/> <span t-if="o.state_id">, </span><span t-field="o.state_id.name"/> <span t-field="o.zip_code"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
-                        <h4>Resumen por Asignatura</h4>
-                        <table class="table table-sm table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Asignatura</th>
-                                    <th>Profesor</th>
-                                    <th class="text-end">Nota Media</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr t-foreach="o.get_subject_summary()" t-as="summary">
-                                    <td><span t-out="summary['subject']"/></td>
-                                    <td><span t-out="summary['professor']"/></td>
-                                    <td class="text-end"><span t-out="summary['average']" t-options='{"widget": "float", "precision": 2}'/></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <!-- Summary Table Section -->
+                        <div class="mb-5">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary text-white rounded px-3 py-1 me-3 fw-bold fs-5 shadow-sm">1</div>
+                                <h3 class="mb-0 text-dark fw-bold" style="letter-spacing: -0.5px;">Resumen por Asignatura</h3>
+                            </div>
+                            
+                            <div class="table-responsive rounded-3 overflow-hidden shadow-sm border">
+                                <table class="table table-borderless table-striped mb-0">
+                                    <thead class="bg-light text-dark text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+                                        <tr>
+                                            <th class="py-3 px-4 w-40">Asignatura</th>
+                                            <th class="py-3 px-4 w-40">Profesor</th>
+                                            <th class="py-3 px-4 text-center w-20">Nota Media</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr t-foreach="o.get_subject_summary()" t-as="summary" class="align-middle border-bottom">
+                                            <td class="py-3 px-4 fw-bold text-dark"><span t-out="summary['subject']"/></td>
+                                            <td class="py-3 px-4 text-secondary"><span t-out="summary['professor']"/></td>
+                                            <td class="py-3 px-4 text-center">
+                                                <t t-set="avg" t-value="summary['average']"/>
+                                                <span t-attf-class="badge rounded-pill px-3 py-2 fs-6 #{ 'bg-success' if avg &gt;= 5.0 else 'bg-danger' }">
+                                                    <span t-out="summary['average']" t-options='{"widget": "float", "precision": 2}'/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr t-if="not o.get_subject_summary()">
+                                            <td colspan="3" class="text-center py-4 text-muted fst-italic">No hay asignaturas registradas para este alumno.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
 
-                        <h4 class="mt-5">Historial Completo</h4>
-                        <table class="table table-bordered">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Asignatura</th>
-                                    <th>Profesor</th>
-                                    <th class="text-end">Nota</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr t-foreach="o.grade_ids" t-as="grade">
-                                    <td><span t-field="grade.date"/></td>
-                                    <td><span t-field="grade.enrollment_id.subject_id.name"/></td>
-                                    <td><span t-field="grade.enrollment_id.professor_id.name"/></td>
-                                    <td class="text-end"><span t-field="grade.score"/></td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <!-- Full History Section -->
+                        <div class="mt-4 break-inside-avoid">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary text-white rounded px-3 py-1 me-3 fw-bold fs-5 shadow-sm">2</div>
+                                <h3 class="mb-0 text-dark fw-bold" style="letter-spacing: -0.5px;">Historial de Evaluaciones</h3>
+                            </div>
+                            
+                            <div class="card border-0 shadow-sm rounded-4 overflow-hidden outline-none">
+                                <table class="table table-hover mb-0">
+                                    <thead class="text-secondary text-uppercase" style="font-size: 0.8rem; border-bottom: 2px solid #dee2e6;">
+                                        <tr>
+                                            <th class="py-3 px-4">Fecha</th>
+                                            <th class="py-3 px-4">Asignatura</th>
+                                            <th class="py-3 px-4">Profesor Evaluador</th>
+                                            <th class="py-3 px-4 text-end">Calificación</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody style="border-top: none;">
+                                        <tr t-foreach="o.grade_ids" t-as="grade" class="align-middle">
+                                            <td class="py-3 px-4 text-secondary"><i class="fa fa-calendar-o me-2"></i><span t-field="grade.date"/></td>
+                                            <td class="py-3 px-4 fw-medium text-dark"><span t-field="grade.enrollment_id.subject_id.name"/></td>
+                                            <td class="py-3 px-4 text-secondary"><span t-field="grade.enrollment_id.professor_id.name"/></td>
+                                            <td class="py-3 px-4 text-end fw-bold">
+                                                <span t-attf-class="#{ 'text-success' if grade.score &gt;= 5.0 else 'text-danger' }">
+                                                    <span t-field="grade.score"/>
+                                                </span>
+                                            </td>
+                                        </tr>
+                                        <tr t-if="not o.grade_ids">
+                                            <td colspan="4" class="text-center py-4 text-muted fst-italic">No existen calificaciones registradas.</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <!-- Footer Branding -->
+                        <div class="mt-5 pt-4 text-center border-top">
+                            <p class="text-muted small mb-0">Documento generado automáticamente por el sistema de gestión académica.</p>
+                            <p class="fw-bold text-primary small mt-1"><span t-field="o.university_id.name"/></p>
+                        </div>
                     </div>
                 </t>
             </t>
