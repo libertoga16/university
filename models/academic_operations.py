@@ -65,11 +65,10 @@ class Enrollment(models.Model):
                 subject = self.env['university.subject'].browse(vals['subject_id'])
                 # Primeras 3 letras en mayúsculas (fallback a UNK si no hay nombre)
                 prefix_str = (subject.name[:3].upper() if subject.name else 'UNK')
-                year_str = str(fields.Date.today().year)
-                prefix = f"{prefix_str}/{year_str}/"
-                
-                # Buscar secuencia específica de la asignatura o crearla
+                # Uso correcto de variables dinámicas de Odoo
+                prefix = f"{prefix_str}/%(year)s/"
                 seq_code = f"enrollment.subject.{subject.id}"
+                
                 seq = self.env['ir.sequence'].sudo().search([('code', '=', seq_code)], limit=1)
                 if not seq:
                     seq = self.env['ir.sequence'].sudo().create({
@@ -77,6 +76,7 @@ class Enrollment(models.Model):
                         'code': seq_code,
                         'prefix': prefix,
                         'padding': 4,
+                        'use_date_range': True, # Reinicia el 0001 cada 1 de enero
                         'company_id': False,
                     })
                 vals['code'] = seq.next_by_id()

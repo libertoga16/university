@@ -79,7 +79,7 @@ class UniversityReport(models.Model):
                     d.id AS department_id,
                     s.id AS student_id,
                     sub.id AS subject_id,
-                    COALESCE(g.score, 0.0) AS score
+                    g.score AS score -- Eliminar el COALESCE
                 FROM
                     university_enrollment e
                 LEFT JOIN

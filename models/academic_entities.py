@@ -147,7 +147,8 @@ class UniversityStudent(models.Model):
         template = self.env.ref('university.email_template_student_report')
         report_action = self.env.ref('university.action_report_student')
         
-        pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(report_action, self.ids)
+        # LLAMADA CORRECTA A LA API DE ODOO 19
+        pdf_content, _ = report_action._render_qweb_pdf(self.ids)
         
         attachment = self.env['ir.attachment'].create({
             'name': f"Informe_{self.name.replace(' ', '_')}.pdf",
@@ -177,7 +178,7 @@ class UniversityStudent(models.Model):
         
         for student in students:
             try:
-                pdf_content, _ = self.env['ir.actions.report']._render_qweb_pdf(report_action, student.ids)
+                pdf_content, _ = report_action._render_qweb_pdf(student.ids)
                 attachment = self.env['ir.attachment'].create({
                     'name': f"Informe_{student.name.replace(' ', '_')}.pdf",
                     'type': 'binary',

@@ -91,5 +91,12 @@
             <field name="model_id" ref="model_university_grade"/>
             <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
         </record>
+
+        <record id="rule_report_company" model="ir.rule">
+            <field name="name">University Report Company Rule</field>
+            <field name="model_id" ref="model_university_report"/>
+            <field name="domain_force">['|', ('company_id', '=', False), ('company_id', 'in', company_ids)]</field>
+            <field name="groups" eval="[(4, ref('base.group_user'))]"/>
+        </record>
     </data>
 </odoo>
