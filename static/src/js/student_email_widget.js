@@ -30,12 +30,17 @@ export class StudentEmailWidget extends Component {
      * @returns {void}
      */
     async onClickSend() {
+        // FORZAR GUARDADO: Si el usuario modificó datos (ej. el email), los guardamos en BD primero.
+        if (this.props.record.isDirty) {
+            await this.props.record.save();
+        }
+
         const recordId = this.props.record.resId;
         const email = this.props.record.data.email;
 
         // Si es un registro nuevo sin guardar o no tiene correo, no disparamos
         if (!recordId || !email) {
-            this.notification.add("Por favor, guarda el registro y asegúrate de que tiene un correo.", { type: "danger" });
+            this.notification.add("Asegúrate de que el estudiante tiene un correo válido.", { type: "danger" });
             return;
         }
 
