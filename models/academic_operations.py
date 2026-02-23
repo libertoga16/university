@@ -79,7 +79,7 @@ class Enrollment(models.Model):
                 if not seq:
                     prefix_str = (subject.name[:3].upper() if subject.name else 'UNK')
                     seq = self.env['ir.sequence'].sudo().create({
-                        'name': f'Secuencia Matrícula {subject.name}',
+                        'name': f'Enrollment Sequence {subject.name}',
                         'code': seq_code,
                         'prefix': f"{prefix_str}/%(year)s/",
                         'padding': 4,

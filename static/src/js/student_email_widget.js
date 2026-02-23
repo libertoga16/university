@@ -4,6 +4,7 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Component, xml } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
+import { _t } from "@web/core/l10n/translation";
 
 /**
  * @description Widget for sending a silent email with the student's report.
@@ -12,7 +13,7 @@ import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
  */
 export class StudentEmailWidget extends Component {
     static template = xml`
-        <button class="btn btn-link p-0 ms-2" t-on-click="onClickSend" t-att-disabled="isSending" title="Enviar reporte rápido">
+        <button class="btn btn-link p-0 ms-2" t-on-click="onClickSend" t-att-disabled="isSending" title="Send Report">
             <i class="fa fa-info-circle text-info fa-lg"/>
         </button>
     `;
@@ -36,7 +37,7 @@ export class StudentEmailWidget extends Component {
                 const saved = await this.props.record.save();
                 // Si la validación de Odoo detuvo el guardado, abortamos silenciosamente
                 if (!saved) {
-                    this.notification.add("Por favor, corrige los errores del formulario antes de enviar el reporte.", { type: "danger" });
+                    this.notification.add(_t("Please correct the form errors before sending the report."), { type: "danger" });
                     return;
                 }
             }
@@ -45,7 +46,7 @@ export class StudentEmailWidget extends Component {
             const email = this.props.record.data.email;
 
             if (!recordId || !email) {
-                this.notification.add("Asegúrate de que el registro tiene un correo válido.", { type: "danger" });
+                this.notification.add(_t("Ensure the student has a valid email address."), { type: "danger" });
                 return;
             }
 
@@ -58,7 +59,7 @@ export class StudentEmailWidget extends Component {
 
             if (result) {
                 this.notification.add(
-                    `Se ha enviado un correo con las notas a ${result}.`,
+                    _t("An email with the grades has been sent to %s.").replace("%s", result),
                     { type: "success" }
                 );
             }

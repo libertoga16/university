@@ -89,8 +89,8 @@ class UniversityStudent(models.Model):
         portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
         
         if not portal_group:
-            # Falla fuerte y claro. No permitas inconsistencias silenciosas.
-            raise UserError(_("Critical Error: 'base.group_portal' is missing. System cannot provision portal users."))
+            raise UserError(_("Critical Error: 'base.group_portal' is missing. The system cannot provision portal users."))
+        portal_group_id = portal_group.id
 
         # 1. Filtrar estudiantes que necesitan usuario
         valid_students = students.filtered(lambda s: s.email and not s.user_id)
@@ -111,7 +111,7 @@ class UniversityStudent(models.Model):
                 'name': email.split('@')[0], # Nombre temporal a partir del correo
                 'login': email,
                 'email': email,
-                'groups_id': [(6, 0, [portal_group.id])],
+                'groups_id': [(6, 0, [portal_group_id])],
             } for email in emails_to_create]
             self.env['res.users'].sudo().create(user_vals)
             
@@ -138,7 +138,7 @@ class UniversityStudent(models.Model):
         self.ensure_one()
         template = self.env.ref('university.email_template_student_report', raise_if_not_found=False)
         return {
-            'name': 'Enviar Reporte',
+            'name': 'Send Report',
             'type': 'ir.actions.act_window',
             'view_mode': 'form',
             'res_model': 'mail.compose.message',
@@ -166,7 +166,7 @@ class UniversityStudent(models.Model):
         pdf_content, _ = report_action._render_qweb_pdf(self.ids)
         
         attachment = self.env['ir.attachment'].create({
-            'name': f"Informe_{self.name.replace(' ', '_')}.pdf",
+            'name': f"Report_{self.name.replace(' ', '_')}.pdf",
             'type': 'binary',
             'datas': base64.b64encode(pdf_content),
             'res_model': 'university.student',
@@ -195,7 +195,7 @@ class UniversityStudent(models.Model):
             try:
                 pdf_content, _ = report_action._render_qweb_pdf(student.ids)
                 attachment = self.env['ir.attachment'].create({
-                    'name': f"Informe_{student.name.replace(' ', '_')}.pdf",
+                    'name': f"Report_{student.name.replace(' ', '_')}.pdf",
                     'type': 'binary',
                     'datas': base64.b64encode(pdf_content),
                     'res_model': 'university.student',
@@ -210,7 +210,7 @@ class UniversityStudent(models.Model):
                 )
                 student.report_pending = False
             except Exception as e:
-                error_msg = f"Error al generar/enviar reporte automático: {str(e)}"
+                error_msg = f"Error generating/sending automatic report: {str(e)}"
                 _logger.error("Failed to generate report for Student %s: %s", student.id, error_msg, exc_info=True)
                 # Opcional, pero nivel Senior: dejar rastro en el historial del alumno
                 student.message_post(body=error_msg, message_type='comment')
