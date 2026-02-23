@@ -45,12 +45,13 @@ export class StudentEmailWidget extends Component {
             const email = this.props.record.data.email;
 
             if (!recordId || !email) {
-                this.notification.add("Asegúrate de que el estudiante tiene un correo válido.", { type: "danger" });
+                this.notification.add("Asegúrate de que el registro tiene un correo válido.", { type: "danger" });
                 return;
             }
 
+            // Uso de resModel dinámico. Ahora el widget funciona en cualquier modelo de Odoo.
             const result = await this.orm.call(
-                "university.student",
+                this.props.record.resModel,
                 "action_send_email_silent_js",
                 [[recordId]]
             );

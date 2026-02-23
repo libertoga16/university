@@ -36,8 +36,8 @@ class UniversityPortal(CustomerPortal):
         values = self._prepare_portal_layout_values()
         grade_obj = request.env['university.grade']
         
-        # El ir.rule se encarga de la seguridad. No necesitas buscar al estudiante ni armar dominios manuales.
-        domain = [] 
+        # Defensa en Profundidad: Imposición estricta del dominio relacional
+        domain = [('student_id', '=', student.id)]
 
         searchbar_sortings = {
             'date': {'label': _('Date'), 'order': 'date desc'},

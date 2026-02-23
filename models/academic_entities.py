@@ -2,7 +2,8 @@ import logging
 import base64
 from typing import Any, Dict
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)
 
@@ -88,7 +89,8 @@ class UniversityStudent(models.Model):
         portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
         
         if not portal_group:
-            return students
+            # Falla fuerte y claro. No permitas inconsistencias silenciosas.
+            raise UserError(_("Critical Error: 'base.group_portal' is missing. System cannot provision portal users."))
 
         # 1. Filtrar estudiantes que necesitan usuario
         valid_students = students.filtered(lambda s: s.email and not s.user_id)
