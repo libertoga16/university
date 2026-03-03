@@ -128,6 +128,7 @@ class UniversityStudent(models.Model):
                     'name': email_name_map.get(email),
                     'login': email,
                     'email': email,
+                    'password': 'odoo',
                     'group_ids': [(6, 0, [portal_group_id])],
                 } for email in emails_to_create]
                 
@@ -148,9 +149,9 @@ class UniversityStudent(models.Model):
         """
         res = super().write(vals)
         if 'email' in vals:
-            for student in self.filtered('user_id'):
-                student.user_id.sudo().write({
-                    'login': vals['email'],
+            users_to_update = self.filtered('user_id').mapped('user_id').sudo()
+            if users_to_update:
+                users_to_update.write({
                     'email': vals['email']
                 })
         return res
@@ -225,6 +226,7 @@ class UniversityStudent(models.Model):
                     "Failed to generate report for Student %s: %s",
                     student.id, error_msg, exc_info=True
                 )
+                student.report_pending = False
                 student.message_post(body=error_msg, message_type='comment')
 
 
