@@ -67,4 +67,4 @@ class TestEnrollmentWizard(TransactionCase):
             self.assertEqual(enrollment.university_id, self.university)
             self.assertEqual(enrollment.subject_id, self.subject)
             self.assertEqual(enrollment.professor_id, self.professor)
-            self.assertTrue(enrollment.code.startswith('ENR'))  # Standard Enrollment prefix
+            self.assertTrue(enrollment.code.startswith('TES'))  # Prefix based on 'Test Subject'

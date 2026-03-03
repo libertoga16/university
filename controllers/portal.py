@@ -17,7 +17,7 @@ class UniversityPortal(CustomerPortal):
             student = request.env['university.student'].search([('user_id', '=', user.id)], limit=1)
             
             if student:
-                # OPTIMIZADO: Ejecuta un SELECT COUNT() en SQL. Cero impacto en RAM.
+                # OPTIMIZED: Executes a SELECT COUNT() in SQL. Zero RAM impact.
                 values['grade_count'] = request.env['university.grade'].search_count([('student_id', '=', student.id)])
             else:
                  values['grade_count'] = 0
@@ -35,7 +35,7 @@ class UniversityPortal(CustomerPortal):
         values = self._prepare_portal_layout_values()
         grade_obj = request.env['university.grade']
         
-        # SEGURIDAD ABSOLUTA: El controlador DEBE imponer el dominio, independientemente del ir.rule
+        # ABSOLUTE SECURITY: Controller MUST enforce domain, regardless of ir.rule
         domain = [('student_id', '=', student.id)] 
 
         searchbar_sortings = {

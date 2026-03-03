@@ -7,12 +7,7 @@ _logger = logging.getLogger(__name__)
 
 
 class University(models.Model):
-    """
-    Architectural entity representing a University.
-
-    Acts as the top-level container for all academic entities (departments, professors,
-    students). It provides aggregate statistics and navigation to related sub-entities.
-    """
+    """Main entity grouping departments, professors, and students."""
     _name = 'university.university'
     _inherit = ['image.mixin', 'batch.count.mixin', 'website.published.mixin', 'website.seo.metadata']
     _description = 'University'
@@ -113,9 +108,7 @@ class University(models.Model):
 
     @api.depends('professor_ids', 'student_ids', 'enrollment_ids', 'department_ids')
     def _compute_counts(self) -> None:
-        """
-        Compute the number of related records for the smart buttons.
-        """
+        """Computes the number of related records for smart buttons."""
         prof_map = self._get_batch_counts('university.professor', 'university_id')
         student_map = self._get_batch_counts('university.student', 'university_id')
         enroll_map = self._get_batch_counts('university.enrollment', 'university_id')

@@ -52,7 +52,11 @@ export class StudentEmailWidget extends Component {
                 );
             }
         } catch (error) {
-            console.error(_t("Error sending email:"), error);
+            console.error("Error sending email:", error);
+            this.notification.add(
+                _t("Failed to send the report. Check the server logs for details."),
+                { type: "danger" }
+            );
         }
     }
 }

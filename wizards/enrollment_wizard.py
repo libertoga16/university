@@ -8,12 +8,7 @@ _logger = logging.getLogger(__name__)
 
 
 class EnrollmentWizard(models.TransientModel):
-    """
-    Wizard for bulk enrollment of students.
-
-    Allows selecting a university, subject, and professor, and then
-    enrolling multiple students at once.
-    """
+    """Wizard for mass enrollment of students."""
     _name = 'university.enrollment.wizard'
     _description = 'Enrollment Wizard'
 
@@ -51,34 +46,30 @@ class EnrollmentWizard(models.TransientModel):
 
     @api.onchange('university_id')
     def _onchange_university_id(self) -> None:
-        """
-        Reset fields when university changes to prevent inconsistent data.
-        """
+        """Clears dependent fields when university changes to maintain consistency."""
         self.subject_id = False
         self.professor_id = False
         self.student_ids = False
 
     def action_enroll(self) -> Dict[str, Any]:
-        """
-        Create enrollments for selected students, preventing duplicates.
-        """
+        """Creates enrollments for selected students, preventing duplicates."""
         self.ensure_one()
         if not self.student_ids:
             return {'type': 'ir.actions.act_window_close'}
 
-        # Obtener IDs de alumnos que ya están inscritos en esta materia
+        # Get IDs of students already enrolled in this subject
         existing_enrollments = self.env['university.enrollment'].search([
             ('subject_id', '=', self.subject_id.id),
             ('student_id', 'in', self.student_ids.ids)
         ])
         enrolled_student_ids = existing_enrollments.mapped('student_id.id')
 
-        # Filtrar solo los alumnos que NO están inscritos
+        # Filter only students who are NOT enrolled
         valid_students = self.student_ids.filtered(lambda s: s.id not in enrolled_student_ids)
 
         if not valid_students:
-            # Opción: Lanzar ValidationError o simplemente retornar
-            raise ValidationError(_("Todos los alumnos seleccionados ya están inscritos en esta asignatura."))
+            # Option: Raise ValidationError or just return
+            raise ValidationError(_("All selected students are already enrolled in this subject."))
 
         vals_list = [{
             'student_id': student.id,

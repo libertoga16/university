@@ -7,12 +7,7 @@ _logger = logging.getLogger(__name__)
 
 
 class UniversityReport(models.Model):
-    """
-    Architectural entity representing a University Report (SQL View).
-
-    A read-only aggregated view of student performance, flattening the
-    relational structure for efficient reporting and analysis.
-    """
+    """Aggregated SQL view of student performance (Read-only)."""
     _name = 'university.report'
     _description = 'University Report'
     _auto = False
@@ -65,9 +60,7 @@ class UniversityReport(models.Model):
     )
 
     def init(self) -> None:
-        """
-        Initialize the SQL view.
-        """
+        """Initializes the report's SQL view."""
         tools.drop_view_if_exists(self.env.cr, self._table)
         self.env.cr.execute("""
             CREATE OR REPLACE VIEW %s AS (
@@ -79,7 +72,7 @@ class UniversityReport(models.Model):
                     d.id AS department_id,
                     s.id AS student_id,
                     sub.id AS subject_id,
-                    g.score AS score -- Eliminar el COALESCE
+                    g.score AS score -- Remove COALESCE
                 FROM
                     university_enrollment e
                 LEFT JOIN
@@ -99,22 +92,32 @@ class UniversityReport(models.Model):
 
 
 class StudentReportParser(models.AbstractModel):
-    # El nombre debe ser "report." + nombre_del_modulo + . + id_del_template
+    """Parser to inject computed data into the students report QWeb."""
     _name = 'report.university.report_student_template'
     _description = 'Student Report Parser'
 
     @api.model
     def _get_report_values(self, docids, data=None):
+        """
+        Generates aggregated data for the report.
+
+        Args:
+            docids (list): Student IDs.
+            data (dict, optional): Additional data.
+
+        Returns:
+            dict: Values injected into QWeb.
+        """
         docs = self.env['university.student'].browse(docids)
         
-        # Obtenemos TODOS los promedios de TODOS los alumnos en 1 sola query SQL
+        # Get ALL averages for ALL students in 1 single SQL query
         groups = self.env['university.grade']._read_group(
             domain=[('student_id', 'in', docids)],
             groupby=['student_id', 'enrollment_id'],
             aggregates=['score:avg']
         )
         
-        # Mapeamos en memoria
+        # Map in memory
         summary_by_student = {doc_id: [] for doc_id in docids}
         for student, enrollment, avg_score in groups:
             summary_by_student[student.id].append({
@@ -123,7 +126,7 @@ class StudentReportParser(models.AbstractModel):
                 'average': avg_score or 0.0
             })
             
-        # Inyectamos el diccionario pre-calculado al QWeb
+        # Inject the pre-calculated dictionary into QWeb
         return {
             'docs': docs,
             'student_summaries': summary_by_student,

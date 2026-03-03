@@ -7,6 +7,7 @@ _logger = logging.getLogger(__name__)
 
 # Subject
 class Subject(models.Model):
+    """Represents subjects taught at the university."""
     _name = 'university.subject'
     _inherit = ['batch.count.mixin']
     _description = 'Subject'
@@ -27,6 +28,7 @@ class Subject(models.Model):
 
     @api.depends('enrollment_ids')
     def _compute_counts(self) -> None:
+        """Computes the number of enrollments for this subject."""
         counts = self._get_batch_counts('university.enrollment', 'subject_id')
         for record in self:
             record.enrollment_count = counts.get(record.id, 0)
@@ -34,6 +36,7 @@ class Subject(models.Model):
 
 # Enrollment
 class Enrollment(models.Model):
+    """Manages student enrollments in subjects."""
     _name = 'university.enrollment'
     _description = 'Enrollment'
     _rec_name = 'code'
@@ -55,12 +58,22 @@ class Enrollment(models.Model):
 
     @api.depends('code', 'student_id.name')
     def _compute_display_name(self) -> None:
+        """Computes a descriptive name combining code and student."""
         for record in self:
             record.display_name = f"{record.code or ''} - {record.student_id.name or ''}"
 
     @api.model_create_multi
     def create(self, vals_list: List[Dict[str, Any]]) -> Any:
-        # 1. Extraer IDs únicos de asignaturas necesarias para las nuevas matrículas
+        """
+        Creates multiple enrollments with optimized sequence code assignment.
+
+        Args:
+            vals_list (List[Dict[str, Any]]): Creation values.
+
+        Returns:
+            Any: Created enrollments.
+        """
+        # Extract unique subject IDs
         subject_ids = {
             vals['subject_id'] 
             for vals in vals_list 
@@ -71,7 +84,7 @@ class Enrollment(models.Model):
             subjects = self.env['university.subject'].browse(list(subject_ids))
             seq_map = {}
             
-            # 2. Buscar o crear todas las secuencias necesarias en lote
+            # Find or create sequences
             for subject in subjects:
                 seq_code = f"enrollment.subject.{subject.id}"
                 seq = self.env['ir.sequence'].sudo().search([('code', '=', seq_code)], limit=1)
@@ -88,7 +101,7 @@ class Enrollment(models.Model):
                     })
                 seq_map[subject.id] = seq
 
-            # 3. Asignar los códigos iterando solo en memoria RAM
+            # Assign codes in memory
             for vals in vals_list:
                 if vals.get('code', 'New') == 'New' and vals.get('subject_id'):
                     vals['code'] = seq_map[vals['subject_id']].next_by_id()
@@ -98,6 +111,7 @@ class Enrollment(models.Model):
 
 # Grade
 class Grade(models.Model):
+    """Records grades obtained in enrollments."""
     _name = 'university.grade'
     _description = 'Grade'
 
@@ -113,5 +127,6 @@ class Grade(models.Model):
 
     @api.depends('student_id.name', 'score')
     def _compute_display_name(self) -> None:
+        """Generates the display name with student and score."""
         for record in self:
             record.display_name = f"{record.student_id.name or ''} - {record.score or 0.0}"
