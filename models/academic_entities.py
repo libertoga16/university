@@ -23,11 +23,10 @@ class Department(models.Model):
 
     @api.depends('professor_ids')
     def _compute_counts(self) -> None:
-        """Computes the total number of professors in the department."""
+        """Calculates the total number of professors recursively in bulk."""
         counts = self._get_batch_counts('university.professor', 'department_id')
         for record in self:
             record.professor_count = counts.get(record.id, 0)
-
 
 # Professor
 class UniversityProfessor(models.Model):
@@ -49,7 +48,7 @@ class UniversityProfessor(models.Model):
 
     @api.depends('enrollment_ids')
     def _compute_counts(self) -> None:
-        """Computes the number of enrollments associated with the professor."""
+        """Calculates associated enrollments mapped by professor."""
         counts = self._get_batch_counts('university.enrollment', 'professor_id')
         for record in self:
             record.enrollment_count = counts.get(record.id, 0)
@@ -90,16 +89,13 @@ class UniversityStudent(models.Model):
     @api.model_create_multi
     def create(self, vals_list):
         """
-        Overrides creation to automatically link or create portal users.
+        Intersects student creation to auto-provision and link portal users based on email.
 
         Args:
-            vals_list (list): Creation dictionaries.
+            vals_list (list): Dictionaries of student fields.
 
         Returns:
-            Recordset: Created students.
-
-        Raises:
-            UserError: If 'base.group_portal' group is missing.
+            Recordset: Newly created university.student records.
         """
         portal_group = self.env.ref('base.group_portal', raise_if_not_found=False)
         if not portal_group:
@@ -122,20 +118,17 @@ class UniversityStudent(models.Model):
                     for v in vals_list if v.get('email')
                 }
                 
-                # Requirement: Generated user must be "Portal" type
-                # This is achieved by injecting portal_group_id
                 user_vals = [{
                     'name': email_name_map.get(email),
                     'login': email,
                     'email': email,
                     'password': 'odoo',
-                    'group_ids': [(6, 0, [portal_group_id])],
+                    'group_ids': [(6, 0, [portal_group_id])], 
                 } for email in emails_to_create]
                 
                 new_users = self.env['res.users'].sudo().create(user_vals)
                 user_map.update({u.login: u.id for u in new_users})
             
-            # Requirement: Link to student automatically
             for vals in vals_list:
                 email = vals.get('email')
                 if email and not vals.get('user_id') and email in user_map:
@@ -145,7 +138,7 @@ class UniversityStudent(models.Model):
 
     def write(self, vals):
         """
-        Synchronizes email changes with the associated portal user.
+        Synchronizes portal user credentials strictly reacting to student email changes.
         """
         res = super().write(vals)
         if 'email' in vals:
@@ -158,7 +151,7 @@ class UniversityStudent(models.Model):
   
     @api.depends('enrollment_ids', 'grade_ids')
     def _compute_counts(self) -> None:
-        """Batch computes enrollment and grade counts."""
+        """Batch computes enrollment and grade counts linking them to the student."""
         enroll_map = self._get_batch_counts('university.enrollment', 'student_id')
         grade_map = self._get_batch_counts('university.grade', 'student_id')
 
@@ -167,7 +160,9 @@ class UniversityStudent(models.Model):
             record.grade_count = grade_map.get(record.id, 0)
 
     def action_send_email(self) -> Dict[str, Any]:
-        """Opens the composer. The report is attached automatically via XML."""
+        """
+        Pops the mail composer pre-filled with the academic report template.
+        """
         self.ensure_one()
         template = self.env.ref('university.email_template_student_report', raise_if_not_found=False)
 
@@ -182,29 +177,29 @@ class UniversityStudent(models.Model):
                 'default_res_ids': self.ids,
                 'default_template_id': template.id if template else False,
                 'default_composition_mode': 'comment',
-                # ZERO manual attachments here. The template does the work.
                 'force_email': True,
             },
         }
 
     def action_send_email_silent_js(self) -> str | bool:
-        """Sends silently. Odoo generates the PDF automatically."""
+        """
+        Pushes the academic report directly via the template preventing frontend blockage.
+
+        Returns:
+            str | bool: Target email address dispatch if successful.
+        """
         self.ensure_one()
         if not self.email:
             return False
 
         template = self.env.ref('university.email_template_student_report')
-        
-        # A single real line of logic.
         template.send_mail(self.id, force_send=True)
         return self.email
         
     @api.model
     def _cron_process_pending_reports(self) -> None:
         """
-        Processes asynchronous sending of academic reports via cron.
-        
-        Limits execution to prevent server timeouts.
+        Yields batches of pending academic reports protecting the thread from SMTP timeouts.
         """
         students = self.search([('report_pending', '=', True)], limit=50)
         if not students:
@@ -214,10 +209,9 @@ class UniversityStudent(models.Model):
 
         for student in students:
             try:
-                # Cero adjuntos manuales. El template manda.
                 template.send_mail(
                     student.id,
-                    force_send=False  # Avoid SMTP timeout
+                    force_send=False 
                 )
                 student.report_pending = False
             except Exception as e:
@@ -232,11 +226,13 @@ class UniversityStudent(models.Model):
 
 
 class ResUsers(models.Model):
-    """Users extension for automatic assignment to students."""
+    """Users extension to ensure strict constraint mapping mapped against student profiles."""
     _inherit = 'res.users'
 
     def _sync_university_students(self):
-        """Finds and links orphaned students with the current users based on email/login."""
+        """
+        Detects unlinked students resolving the current users' emails and hooks them.
+        """
         emails = [e for u in self for e in (u.login, u.email) if e]
         if not emails:
             return
@@ -262,13 +258,13 @@ class ResUsers(models.Model):
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Links new users to matching student if exists."""
+        """Forces newly provisioned system users to capture ownership of any orphaned students."""
         users = super().create(vals_list)
         users._sync_university_students()
         return users
 
     def write(self, vals):
-        """Relinks user to student if login or email is updated."""
+        """Hooks onto credentials modifications binding orphaned students if matches resurface."""
         res = super().write(vals)
         if 'login' in vals or 'email' in vals:
             self._sync_university_students()

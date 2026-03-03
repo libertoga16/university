@@ -4,9 +4,12 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Component, xml } from "@odoo/owl";
 import { standardWidgetProps } from "@web/views/widgets/standard_widget_props";
-import { _t } from "@web/core/l10n/translation"; // Obligatorio para Odoo
+import { _t } from "@web/core/l10n/translation";
 import { sprintf } from "@web/core/utils/strings";
 
+/**
+ * @description Decoupled lightweight widget pushing direct model execution into the RPC layer.
+ */
 export class StudentEmailWidget extends Component {
     static template = xml`
         <button class="btn btn-link p-0 ms-2" t-on-click="onClickSend" t-att-title="titleText">
@@ -24,6 +27,10 @@ export class StudentEmailWidget extends Component {
         return _t("Send quick report");
     }
 
+    /**
+     * @description Ensures reactive DOM commits upstream before executing the backend mailing strategy without reloading.
+     * @returns {Promise<void>}
+     */
     async onClickSend() {
         if (this.props.record.isDirty) {
             await this.props.record.save();
@@ -38,7 +45,6 @@ export class StudentEmailWidget extends Component {
         }
 
         try {
-            // Dinámico. Nunca más hardcodees un modelo en un widget reutilizable.
             const result = await this.orm.call(
                 this.props.record.resModel,
                 "action_send_email_silent_js",

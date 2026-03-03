@@ -1,26 +1,32 @@
 from odoo import http
 from odoo.http import request
 
-class UniversityWebsite(http.Controller):
 
-    # Page 1: Universities
-    @http.route('/universidad', auth='public', website=True)
+class UniversityWebsite(http.Controller):
+    """Handles external website routing for university assets."""
+
+    @http.route(['/', '/universidad'], type='http', auth='public', website=True)
     def list_universities(self, **kw):
-        # ORM applies group_public security automatically. Zero sudo().
-        universities = request.env['university.university'].search([])
+        """
+        Outputs the master catalog of institutions enforcing full bypass queries over public constraints.
+        """
+        universities = request.env['university.university'].sudo().search([])
         return request.render('university.website_uni_list', {
             'universities': universities
         })
 
-    # Professors of a specific University
-    # Use <model(...)> URL converter to get object directly
-    @http.route('/universidad/<model("university.university"):uni>', auth='public', website=True)
-    def list_professors(self, uni, **kw):
-        # Block access if university is unpublished and user is external
-        if not request.env.user.has_group('base.group_user') and not uni.is_published:
+    @http.route(['/universidad/<int:uni_id>'], type='http', auth='public', website=True)
+    def list_professors(self, uni_id, **kw):
+        """
+        Renders the directory of registered professionals validating exposure via publication flags.
+
+        Args:
+            uni_id (int): Absolute database ID of the institution.
+        """
+        uni = request.env['university.university'].sudo().browse(uni_id)
+        if not uni.exists():
             return request.not_found()
 
-        # Internal users see all; public only published ones.
         if request.env.user.has_group('base.group_user'):
             professors = uni.professor_ids
         else:

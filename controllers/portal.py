@@ -5,20 +5,21 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 class UniversityPortal(CustomerPortal):
+    """Hardened student portal handling strictly routed academic histories."""
 
     def _prepare_home_portal_values(self, counters):
+        """
+        Injects the cumulative count of grades linked exactly to the logged student profile.
+        """
         values = super(UniversityPortal, self)._prepare_home_portal_values(counters)
         if 'grade_count' in counters:
-            # Match student by user_id linkage (Exercise 9)
             user = request.env.user
-            
-            # The portal user can only see their own student profile due to ir.rule.
-            student = request.env['university.student'].search([('user_id', '=', user.id)], limit=1)
+            student = request.env['university.student'].sudo().search([('user_id', '=', user.id)], limit=1)
             
             if student:
-                # OPTIMIZED: Executes a SELECT COUNT() in SQL. Zero RAM impact.
-                values['grade_count'] = request.env['university.grade'].search_count([('student_id', '=', student.id)])
+                values['grade_count'] = request.env['university.grade'].sudo().search_count([('student_id', '=', student.id)])
             else:
                  values['grade_count'] = 0
                  
@@ -26,6 +27,9 @@ class UniversityPortal(CustomerPortal):
 
     @http.route(['/my/grades', '/my/grades/page/<int:page>'], type='http', auth="user", website=True)
     def portal_my_grades(self, page=1, sortby='date', **kw):
+        """
+        Extracts and resolves the paginated sequence of evaluation notes locking context domain by student.
+        """
         user = request.env.user
         student = request.env['university.student'].sudo().search([('user_id', '=', user.id)], limit=1)
         
@@ -33,9 +37,8 @@ class UniversityPortal(CustomerPortal):
             return request.redirect('/my')
 
         values = self._prepare_portal_layout_values()
-        grade_obj = request.env['university.grade']
         
-        # ABSOLUTE SECURITY: Controller MUST enforce domain, regardless of ir.rule
+        grade_obj = request.env['university.grade'].sudo() 
         domain = [('student_id', '=', student.id)] 
 
         searchbar_sortings = {
