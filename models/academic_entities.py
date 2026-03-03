@@ -63,7 +63,7 @@ class UniversityStudent(models.Model):
     _description = 'University Student'
 
     name = fields.Char(string='Name', required=True, index=True)
-    email = fields.Char(string='Email', required=True)
+    email = fields.Char(string='Email', required=True, index=True)
     
     university_id = fields.Many2one('university.university', string='University', check_company=True)
     tutor_id = fields.Many2one('university.professor', string='Tutor', check_company=True)
@@ -82,7 +82,7 @@ class UniversityStudent(models.Model):
     image_1920 = fields.Image(string="Image")
     image_128 = fields.Image(related='image_1920', max_width=128, store=True, string="Thumbnail")
 
-    report_pending = fields.Boolean(string="Report Pending", default=False)
+    report_pending = fields.Boolean(string="Report Pending", default=False, index=True)
 
     enrollment_count = fields.Integer(compute='_compute_counts')
     grade_count = fields.Integer(compute='_compute_counts')
@@ -141,6 +141,19 @@ class UniversityStudent(models.Model):
                     vals['user_id'] = user_map[email]
 
         return super().create(vals_list)
+
+    def write(self, vals):
+        """
+        Synchronizes email changes with the associated portal user.
+        """
+        res = super().write(vals)
+        if 'email' in vals:
+            for student in self.filtered('user_id'):
+                student.user_id.sudo().write({
+                    'login': vals['email'],
+                    'email': vals['email']
+                })
+        return res
   
     @api.depends('enrollment_ids', 'grade_ids')
     def _compute_counts(self) -> None:
