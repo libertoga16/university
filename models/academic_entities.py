@@ -2,7 +2,7 @@ import logging
 from typing import Any, Dict
 
 from odoo import models, fields, api, _
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError, ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -27,6 +27,18 @@ class Department(models.Model):
         counts = self._get_batch_counts('university.professor', 'department_id')
         for record in self:
             record.professor_count = counts.get(record.id, 0)
+
+    @api.constrains('manager_id', 'university_id')
+    def _check_manager_university(self) -> None:
+        """
+        Validates that the department manager belongs to the same university.
+
+        Raises:
+            ValidationError: If the manager belongs to a different university.
+        """
+        for record in self:
+            if record.manager_id and record.manager_id.university_id != record.university_id:
+                raise ValidationError(_("The manager must belong to the same university as the department."))
 
 # Professor
 class UniversityProfessor(models.Model):
@@ -85,6 +97,18 @@ class UniversityStudent(models.Model):
 
     enrollment_count = fields.Integer(compute='_compute_counts')
     grade_count = fields.Integer(compute='_compute_counts')
+
+    @api.constrains('tutor_id', 'university_id')
+    def _check_tutor_university(self) -> None:
+        """
+        Validates that the tutor belongs to the same university as the student.
+
+        Raises:
+            ValidationError: If the tutor belongs to a different university.
+        """
+        for record in self:
+            if record.tutor_id and record.tutor_id.university_id != record.university_id:
+                raise ValidationError(_("The tutor must belong to the same university as the student."))
 
     @api.model_create_multi
     def create(self, vals_list):

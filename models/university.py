@@ -1,7 +1,8 @@
 import logging
 from typing import Any, Dict, List, Optional
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -119,3 +120,15 @@ class University(models.Model):
             record.student_count = student_map.get(record.id, 0)
             record.enrollment_count = enroll_map.get(record.id, 0)
             record.department_count = dept_map.get(record.id, 0)
+
+    @api.constrains('director_id')
+    def _check_director_university(self) -> None:
+        """
+        Validates that the assigned director belongs to the university.
+
+        Raises:
+            ValidationError: If the director belongs to a different university.
+        """
+        for record in self:
+            if record.director_id and record.director_id.university_id != record:
+                raise ValidationError(_("The director must belong to the same university."))

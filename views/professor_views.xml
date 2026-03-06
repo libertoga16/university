@@ -7,12 +7,15 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
+                    <!-- Header: Avatar y Botones Estadísticos -->
                     <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
                     <div class="oe_button_box" name="button_box">
                          <button name="%(action_university_enrollment)d" type="action" class="oe_stat_button" icon="fa-pencil-square-o" context="{'default_professor_id': id, 'search_default_professor_id': id}">
                             <field name="enrollment_count" widget="statinfo" string="Enrollments"/>
                         </button>
                     </div>
+                    
+                    <!-- Información Principal -->
                     <group>
                         <group name="main_info">
                             <field name="name"/>
@@ -23,6 +26,8 @@
                             <field name="department_id"/>
                         </group>
                     </group>
+                    
+                    <!-- Notebook: Relaciones y Detalles Extra -->
                     <notebook>
                         <page string="Subjects" name="subjects">
                             <field name="subject_ids"/>
@@ -56,17 +61,14 @@
                 <field name="image_128"/>
                 <templates>
                     <t t-name="card">
-                        <div class="oe_kanban_global_click d-flex align-items-center">
-                            <div class="o_kanban_image me-3">
+                        <!-- Kanban Card Content -->
+                        <div class="d-flex align-items-center">
+                            <div class="me-3">
                                 <field name="image_128" widget="image" class="o_image_64_max rounded shadow-sm"/>
                             </div>
-                            <div class="oe_kanban_details">
-                                <strong class="o_kanban_record_title">
-                                    <field name="name"/>
-                                </strong>
-                                <div class="text-muted">
-                                    <field name="department_id"/>
-                                </div>
+                            <div class="d-flex flex-column">
+                                <field name="name" class="fw-bolder fs-5"/>
+                                <span class="text-muted"><field name="department_id"/></span>
                             </div>
                         </div>
                     </t>

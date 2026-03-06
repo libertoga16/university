@@ -46,17 +46,15 @@
                 <field name="score"/>
                 <templates>
                     <t t-name="card">
-                        <div class="oe_kanban_global_click">
-                            <div class="o_kanban_record_top">
-                                <strong class="o_kanban_record_title">
-                                    <field name="enrollment_id"/>
-                                </strong>
-                            </div>
-                            <div class="o_kanban_record_body">
+                        <div class="d-flex mb-2" style="justify-content: space-between;">
+                            <field name="enrollment_id" class="fw-bolder fs-5"/>
+                        </div>
+                        <footer>
+                            <div class="d-flex justify-content-between text-muted w-100">
                                 <div><field name="student_id"/></div>
                                 <div><field name="score"/></div>
                             </div>
-                        </div>
+                        </footer>
                     </t>
                 </templates>
             </kanban>

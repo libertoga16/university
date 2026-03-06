@@ -1,7 +1,8 @@
 import logging
 from typing import Any, Dict, List
 
-from odoo import models, fields, api
+from odoo import models, fields, api, _
+from odoo.exceptions import ValidationError
 
 _logger = logging.getLogger(__name__)
 
@@ -33,6 +34,18 @@ class Subject(models.Model):
         for record in self:
             record.enrollment_count = counts.get(record.id, 0)
 
+    @api.constrains('professor_ids', 'university_id')
+    def _check_professors_university(self) -> None:
+        """
+        Validates that all assigned professors belong to the same university as the subject.
+
+        Raises:
+            ValidationError: If any professor belongs to a different university.
+        """
+        for record in self:
+            if record.university_id and any(prof.university_id and prof.university_id != record.university_id for prof in record.professor_ids):
+                raise ValidationError(_("All professors assigned to the subject must belong to the same university."))
+
 
 # Enrollment
 class Enrollment(models.Model):
@@ -61,6 +74,42 @@ class Enrollment(models.Model):
         """Computes a descriptive name combining code and student."""
         for record in self:
             record.display_name = f"{record.code or ''} - {record.student_id.name or ''}"
+
+    @api.constrains('professor_id', 'university_id')
+    def _check_professor_university(self) -> None:
+        """
+        Validates that the assigned professor belongs to the same university.
+
+        Raises:
+            ValidationError: If the professor belongs to a different university.
+        """
+        for record in self:
+            if record.professor_id and record.professor_id.university_id != record.university_id:
+                raise ValidationError(_("The professor must belong to the same university as the enrollment."))
+
+    @api.constrains('student_id', 'university_id')
+    def _check_student_university(self) -> None:
+        """
+        Validates that the enrolled student belongs to the same university.
+
+        Raises:
+            ValidationError: If the student belongs to a different university.
+        """
+        for record in self:
+            if record.student_id and record.student_id.university_id != record.university_id:
+                raise ValidationError(_("The student must belong to the same university as the enrollment."))
+
+    @api.constrains('subject_id', 'university_id')
+    def _check_subject_university(self) -> None:
+        """
+        Validates that the subject belongs to the same university.
+
+        Raises:
+            ValidationError: If the subject belongs to a different university.
+        """
+        for record in self:
+            if record.subject_id and record.subject_id.university_id != record.university_id:
+                raise ValidationError(_("The subject must belong to the same university as the enrollment."))
 
     @api.model_create_multi
     def create(self, vals_list: List[Dict[str, Any]]) -> Any:

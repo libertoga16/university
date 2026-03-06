@@ -62,21 +62,25 @@
       
         <record id="test_student_john" model="university.student">
             <field name="name">John Doe</field>
+            <field name="email">john.doe@example.com</field>
             <field name="university_id" ref="test_uni_tech"/>
         </record>
         
         <record id="test_student_jane" model="university.student">
             <field name="name">Jane Smith</field>
+            <field name="email">jane.smith@example.com</field>
             <field name="university_id" ref="test_uni_tech"/>
         </record>
         
         <record id="test_student_emily" model="university.student">
             <field name="name">Emily Bronte</field>
+            <field name="email">emily.bronte@example.com</field>
             <field name="university_id" ref="test_uni_arts"/>
         </record>
         
         <record id="test_student_marie" model="university.student">
             <field name="name">Marie Curie</field>
+            <field name="email">marie.curie@example.com</field>
             <field name="university_id" ref="test_uni_science"/>
         </record>
 
