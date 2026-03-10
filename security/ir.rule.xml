@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="1">
+    <data noupdate="0">
         <!-- Regla para que el usuario portal solo vea sus propias notas -->
         <record id="rule_grade_portal" model="ir.rule">
             <field name="name">Portal User Own Grades</field>

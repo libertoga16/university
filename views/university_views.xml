@@ -1,63 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- FORM VIEW -->
     <record id="university_university_view_form" model="ir.ui.view">
-        <field name="name">university.university.view.form</field>
+        <field name="name">university.university.form</field>
         <field name="model">university.university</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
                     <div class="oe_button_box" name="button_box">
-                        <button name="%(action_university_student)d" type="action" class="oe_stat_button" icon="fa-users" context="{'default_university_id': id, 'search_default_university_id': id}">
+                        <button name="%(university.action_university_student)d" type="action" class="oe_stat_button" icon="fa-users">
                             <field name="student_count" widget="statinfo" string="Students"/>
                         </button>
-                        <button name="%(action_university_professor)d" type="action" class="oe_stat_button" icon="fa-user-tie" context="{'default_university_id': id, 'search_default_university_id': id}">
-                            <field name="professor_count" widget="statinfo" string="Professors"/>
-                        </button>
-                        <button name="%(action_university_enrollment)d" type="action" class="oe_stat_button" icon="fa-pencil-square-o" context="{'default_university_id': id, 'search_default_university_id': id}">
-                            <field name="enrollment_count" widget="statinfo" string="Enrollments"/>
-                        </button>
-                        <button name="%(action_university_department)d" type="action" class="oe_stat_button" icon="fa-building" context="{'default_university_id': id, 'search_default_university_id': id}">
-                            <field name="department_count" widget="statinfo" string="Departments"/>
-                        </button>
+                    </div>
+                    <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="University Name"/></h1>
                     </div>
                     <group>
-                        <group name="main_info">
-                            <field name="name"/>
-                            <field name="email" widget="email"/>
-                            <field name="director_id"/>
-                        </group>
-                        <group name="address_info">
-                            <label for="street" string="Address"/>
-                            <div class="o_address_format">
-                                <field name="street" placeholder="Street..." class="o_address_street"/>
-                                <field name="city" placeholder="City" class="o_address_city"/>
-                                <field name="state_id" class="o_address_state" placeholder="State" options="{'no_open': True}"/>
-                                <field name="zip_code" placeholder="ZIP" class="o_address_zip"/>
-                                <field name="country_id" placeholder="Country" class="o_address_country" options="{'no_open': True, 'no_create': True}"/>
-                            </div>
-                        </group>
+                        <field name="email" widget="email"/>
+                        <field name="director_id" widget="many2one_avatar"/>
                     </group>
                     <notebook>
-                        <page string="Departments" name="departments">
-                            <field name="department_ids"/>
-                        </page>
                         <page string="Professors" name="professors">
                             <field name="professor_ids" mode="kanban">
                                 <kanban>
                                     <field name="id"/>
                                     <field name="image_128"/>
-                                    <field name="department_id"/>
                                     <templates>
                                         <t t-name="card">
                                             <div class="d-flex align-items-center">
-                                                <div class="me-3">
-                                                    <field name="image_128" widget="image" class="o_image_64_max rounded shadow-sm"/>
+                                                <img t-if="record.image_128.raw_value"
+                                                     t-attf-src="/web/image/university.professor/#{record.id.raw_value}/image_128"
+                                                     class="o_image_64_max rounded shadow-sm me-3"
+                                                     alt="Professor"/>
+                                                <div t-else="" class="o_image_64_max rounded shadow-sm bg-light d-flex align-items-center justify-content-center me-3" style="width:64px; height:64px;">
+                                                    <i class="fa fa-user fa-2x text-muted"/>
                                                 </div>
                                                 <div class="d-flex flex-column">
-                                                    <field name="name" class="fw-bolder fs-5"/>
-                                                    <span class="text-muted"><field name="department_id"/></span>
+                                                    <field name="name" class="fw-bolder"/>
                                                 </div>
                                             </div>
                                         </t>
@@ -71,32 +50,24 @@
         </field>
     </record>
 
-    <!-- LIST VIEW -->
-    <record id="university_university_view_list" model="ir.ui.view">
-        <field name="name">university.university.view.list</field>
-        <field name="model">university.university</field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="name"/>
-                <field name="city"/>
-                <field name="country_id"/>
-            </list>
-        </field>
-    </record>
-
-    <!-- KANBAN VIEW -->
     <record id="university_university_view_kanban" model="ir.ui.view">
         <field name="name">university.university.view.kanban</field>
         <field name="model">university.university</field>
         <field name="arch" type="xml">
-            <kanban>
+            <kanban sample="1">
                 <field name="id"/>
                 <field name="image_128"/>
                 <templates>
                     <t t-name="card">
                         <div class="d-flex align-items-center">
                             <div class="me-3">
-                                <field name="image_128" widget="image" class="o_image_64_max rounded shadow-sm"/>
+                                <img t-if="record.image_128.raw_value"
+                                     t-attf-src="/web/image/university.university/#{record.id.raw_value}/image_128"
+                                     class="o_image_64_max rounded shadow-sm"
+                                     style="width: 64px; height: 64px; object-fit: cover;"/>
+                                <div t-else="" class="o_image_64_max rounded shadow-sm bg-light d-flex align-items-center justify-content-center" style="width: 64px; height: 64px;">
+                                    <i class="fa fa-university fa-2x text-muted"/>
+                                </div>
                             </div>
                             <div class="d-flex flex-column">
                                 <field name="name" class="fw-bolder fs-5"/>
@@ -108,19 +79,4 @@
             </kanban>
         </field>
     </record>
-
-    <!-- SEARCH VIEW -->
-    <record id="university_university_view_search" model="ir.ui.view">
-        <field name="name">university.university.view.search</field>
-        <field name="model">university.university</field>
-        <field name="arch" type="xml">
-            <search>
-                <field name="name"/>
-                <field name="city"/>
-                <field name="country_id"/>
-            </search>
-        </field>
-    </record>
-
-
 </odoo>

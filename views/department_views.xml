@@ -1,29 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- FORM VIEW -->
     <record id="university_department_view_form" model="ir.ui.view">
         <field name="name">university.department.view.form</field>
         <field name="model">university.department</field>
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <!-- Header: Botones Estadísticos -->
                     <div class="oe_button_box" name="button_box">
                         <button name="%(action_university_professor)d" type="action" class="oe_stat_button" icon="fa-user-tie" context="{'search_default_department_id': id, 'default_department_id': id}">
                              <field name="professor_count" widget="statinfo" string="Professors"/>
                         </button>
                     </div>
-                    <!-- Información Principal -->
                     <group>
                         <group name="main_info">
                             <field name="name"/>
                             <field name="university_id"/>
                         </group>
                         <group name="structure">
-                            <field name="manager_id"/>
+                            <field name="manager_id" widget="many2one_avatar_user"/>
                         </group>
                     </group>
-                    <!-- Notebook: Relaciones y Detalles Extra -->
                     <notebook>
                         <page string="Professors" name="professors">
                             <field name="professor_ids" mode="kanban">
@@ -32,11 +28,16 @@
                                     <field name="name"/>
                                     <field name="image_128"/>
                                     <templates>
-                                        <!-- Kanban Card Content -->
                                         <t t-name="card">
                                             <div class="d-flex align-items-center">
                                                 <div class="me-3">
-                                                    <field name="image_128" widget="image" class="o_image_64_max rounded shadow-sm" alt="Profesor"/>
+                                                    <img t-if="record.image_128.raw_value"
+                                                         t-attf-src="/web/image/university.professor/#{record.id.raw_value}/image_128"
+                                                         class="o_image_64_max rounded shadow-sm"
+                                                         alt="Professor"/>
+                                                    <div t-else="" class="o_image_64_max rounded shadow-sm bg-light d-flex align-items-center justify-content-center">
+                                                        <i class="fa fa-user fa-2x text-muted"/>
+                                                    </div>
                                                 </div>
                                                 <div class="d-flex flex-column">
                                                     <field name="name" class="fw-bolder fs-5"/>
@@ -53,44 +54,49 @@
         </field>
     </record>
 
-    <!-- LIST VIEW -->
     <record id="university_department_view_list" model="ir.ui.view">
         <field name="name">university.department.view.list</field>
         <field name="model">university.department</field>
         <field name="arch" type="xml">
-            <list>
-                <field name="name"/>
+            <list sample="1">
+                <field name="name" decoration-bf="1"/>
                 <field name="university_id"/>
-                <field name="manager_id"/>
+                <field name="manager_id" widget="many2one_avatar_user"/>
+                <field name="professor_count" sum="Total Professors"/>
             </list>
         </field>
     </record>
 
-    <!-- KANBAN VIEW -->
     <record id="university_department_view_kanban" model="ir.ui.view">
         <field name="name">university.department.view.kanban</field>
         <field name="model">university.department</field>
         <field name="arch" type="xml">
-            <kanban>
+            <kanban class="o_kanban_mobile" sample="1">
                 <field name="name"/>
                 <field name="university_id"/>
+                <field name="manager_id"/>
                 <templates>
                     <t t-name="card">
-                        <div class="d-flex mb-2" style="justify-content: space-between;">
-                            <field name="name" class="fw-bolder fs-5"/>
-                        </div>
-                        <footer>
-                            <div class="d-flex text-muted">
-                                <field name="university_id"/>
+                        <div class="d-flex flex-column">
+                            <div class="mb-2">
+                                <field name="name" class="fw-bolder fs-5"/>
                             </div>
-                        </footer>
+                            <div class="text-muted small">
+                                <i class="fa fa-university me-1"/> <field name="university_id"/>
+                            </div>
+                            <footer class="mt-2 pt-2 border-top d-flex justify-content-between align-items-center">
+                                <field name="manager_id" widget="many2one_avatar_user"/>
+                                <span class="badge rounded-pill text-bg-info">
+                                    <field name="professor_count"/> Prof.
+                                </span>
+                            </footer>
+                        </div>
                     </t>
                 </templates>
             </kanban>
         </field>
     </record>
 
-    <!-- SEARCH VIEW -->
     <record id="university_department_view_search" model="ir.ui.view">
         <field name="name">university.department.view.search</field>
         <field name="model">university.department</field>
@@ -98,10 +104,11 @@
             <search>
                 <field name="name"/>
                 <field name="university_id"/>
+                <field name="manager_id"/>
+                <separator/>
                 <filter string="University" name="group_university" context="{'group_by':'university_id'}"/>
+                <filter string="Manager" name="group_manager" context="{'group_by':'manager_id'}"/>
             </search>
         </field>
     </record>
-
-
 </odoo>
