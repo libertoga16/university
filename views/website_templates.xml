@@ -28,10 +28,7 @@
             </div>
         </t>
     </template>
-    <template id="portal_layout_disable_edit" inherit_id="portal.portal_layout">
-        <xpath expr="//div[hasclass('o_portal_my_details')]//a[contains(@href, '/my/account')]" position="replace">
-            </xpath>
-    </template>
+
 
     <template id="website_prof_list" name="Professors">
         <t t-call="website.layout">

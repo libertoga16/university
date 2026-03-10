@@ -17,7 +17,7 @@
                     </div>
                     <group>
                         <field name="email" widget="email"/>
-                        <field name="director_id" widget="many2one_avatar"/>
+                        <field name="director_id" widget="many2one_avatar" domain="['|', ('university_id', '=', id), ('university_id', '=', False)]"/>
                     </group>
                     <notebook>
                         <page string="Professors" name="professors">

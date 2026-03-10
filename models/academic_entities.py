@@ -22,7 +22,7 @@ class Department(models.Model):
         domain="[('university_id', '=', university_id)]",
     )
     professor_ids = fields.One2many('university.professor', 'department_id', string='Professors')
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+
 
     professor_count = fields.Integer(compute='_compute_counts', string='Professor Count')
 
@@ -67,8 +67,12 @@ class UniversityProfessor(models.Model):
         index=True,
         domain="[('university_id', '=', university_id)]",
     )
-    subject_ids = fields.Many2many('university.subject', string='Subjects')
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+    subject_ids = fields.Many2many(
+        'university.subject', 
+        string='Subjects',
+        domain="[('university_id', '=', university_id)]"
+    )
+
     enrollment_ids = fields.One2many('university.enrollment', 'professor_id', string='Enrollments')
 
     enrollment_count = fields.Integer(compute='_compute_counts', string='Enrollment Count')
@@ -97,7 +101,7 @@ class UniversityStudent(models.Model):
         string='Tutor',
         domain="[('university_id', '=', university_id)]",
     )
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+
     
     enrollment_ids = fields.One2many('university.enrollment', 'student_id', string='Enrollments')
     grade_ids = fields.One2many('university.grade', 'student_id', string='Grades')
@@ -105,7 +109,7 @@ class UniversityStudent(models.Model):
 
     street = fields.Char()
     city = fields.Char()
-    state_id = fields.Many2one('res.country.state')
+    state_id = fields.Many2one('res.country.state', domain="[('country_id', '=', country_id)]")
     zip_code = fields.Char()
     country_id = fields.Many2one('res.country')
     
@@ -160,13 +164,9 @@ class UniversityStudent(models.Model):
             emails_to_create = unique_emails - set(user_map.keys())
             
             if emails_to_create:
-                email_name_map = {
-                    v.get('email'): v.get('name', v.get('email').split('@')[0]) 
-                    for v in vals_list if v.get('email')
-                }
                 
                 user_vals = [{
-                    'name': email_name_map.get(email),
+                    'name': email,   
                     'login': email,
                     'email': email,
                     'password': 'odoo',

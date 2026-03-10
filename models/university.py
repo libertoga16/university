@@ -23,14 +23,9 @@ class University(models.Model):
         string='Email',
         help="University email address."
     )
-    company_id = fields.Many2one(
-        'res.company', 
-        string='Company', 
-        required=True, 
-        default=lambda self: self.env.company
-    )
 
-    # === ADDRESS FIELDS ===
+
+    # ADDRESS FIELDS
     street = fields.Char(
         string='Street',
         help="Street address."
@@ -55,7 +50,7 @@ class University(models.Model):
         help="Postal code."
     )
 
-    # === RELATIONAL FIELDS ===
+    # RELATIONAL FIELDS
     director_id = fields.Many2one(
         comodel_name='university.professor',
         string='Director',
@@ -83,7 +78,7 @@ class University(models.Model):
         string='Departments'
     )
 
-    # === COMPUTED FIELDS ===
+    # COMPUTED FIELDS
     professor_count = fields.Integer(
         compute='_compute_counts',
         string='Professor Count'

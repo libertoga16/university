@@ -14,12 +14,12 @@
                     </div>
                     <group>
                         <group name="main_info">
-                            <field name="student_id"/>
-                            <field name="subject_id"/>
+                            <field name="student_id" domain="[('university_id', '=', university_id)]"/>
+                            <field name="subject_id" domain="[('university_id', '=', university_id)]"/>
                         </group>
                         <group name="org_info">
                             <field name="university_id"/>
-                            <field name="professor_id" widget="many2one_avatar"/>
+                            <field name="professor_id" widget="many2one_avatar" domain="[('university_id', '=', university_id)]"/>
                         </group>
                     </group>
                     <notebook>

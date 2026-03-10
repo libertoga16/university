@@ -24,7 +24,7 @@
                     </group>
                     <notebook>
                         <page string="Professors" name="professors">
-                            <field name="professor_ids"/>
+                            <field name="professor_ids" domain="[('university_id', '=', university_id)]"/>
                         </page>
                     </notebook>
                 </sheet>

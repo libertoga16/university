@@ -24,9 +24,13 @@ class Subject(models.Model):
         readonly=True,
         index=True,
     )
-    professor_ids = fields.Many2many('university.professor', string='Professors')
+    professor_ids = fields.Many2many(
+        'university.professor', 
+        string='Professors',
+        domain="[('university_id', '=', university_id)]"
+    )
     enrollment_ids = fields.One2many('university.enrollment', 'subject_id', string='Enrollments')
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+
 
     enrollment_count = fields.Integer(compute='_compute_counts', string='Enrollment Count')
 
@@ -81,7 +85,7 @@ class Enrollment(models.Model):
         domain="[('university_id', '=', university_id)]",
     )
     grade_ids = fields.One2many('university.grade', 'enrollment_id', string='Grades')
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+
 
     _sql_constraints = [
         ('unique_student_subject', 
@@ -178,7 +182,7 @@ class Enrollment(models.Model):
                         'prefix': f"{prefix_str}/%(year)s/",
                         'padding': 4,
                         'use_date_range': True,
-                        'company_id': False,
+
                     })
                 seq_map[subject.id] = seq
 
@@ -206,7 +210,7 @@ class Grade(models.Model):
 
     score = fields.Float(string='Score', index=True)
     date = fields.Date(string='Date', default=fields.Date.context_today)
-    company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
+
 
     @api.depends('student_id.name', 'score')
     def _compute_display_name(self) -> None:

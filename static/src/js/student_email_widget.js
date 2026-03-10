@@ -32,7 +32,7 @@ export class StudentEmailWidget extends Component {
      * @returns {Promise<void>}
      */
     async onClickSend() {
-        if (this.props.record.isDirty) {
+        if (this.props.record.isDirty) {//Automaticlly save
             await this.props.record.save();
         }
 
@@ -67,6 +67,6 @@ export class StudentEmailWidget extends Component {
     }
 }
 
-registry.category("view_widgets").add("student_send_email", {
+registry.category("view_widgets").add("student_send_email", {//poder insteralo en etiquetas xml
     component: StudentEmailWidget,
 });

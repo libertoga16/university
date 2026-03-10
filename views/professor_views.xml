@@ -23,14 +23,14 @@
                             <field name="university_id"/>
                         </group>
                         <group name="deps">
-                            <field name="department_id"/>
+                            <field name="department_id" domain="[('university_id', '=', university_id)]"/>
                         </group>
                     </group>
                     
                     <!-- Notebook: Relaciones y Detalles Extra -->
                     <notebook>
                         <page string="Subjects" name="subjects">
-                            <field name="subject_ids"/>
+                            <field name="subject_ids" domain="[('university_id', '=', university_id)]"/>
                         </page>
                     </notebook>
                 </sheet>

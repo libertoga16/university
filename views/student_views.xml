@@ -31,7 +31,7 @@
                         </group>
                         <group name="academic_info">
                             <field name="university_id"/>
-                            <field name="tutor_id"/>
+                            <field name="tutor_id" domain="[('university_id', '=', university_id)]"/>
                         </group>
                         <group name="address_info">
                              <label for="street" string="Address"/>

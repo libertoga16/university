@@ -13,7 +13,7 @@ class UniversityReport(models.Model):
     _auto = False
     _rec_name = 'student_id'
 
-    # === DIMENSIONS (GROUP BY) ===
+    #DIMENSIONS (GROUP BY)
     university_id = fields.Many2one(
         comodel_name='university.university',
         string='University',
@@ -44,14 +44,9 @@ class UniversityReport(models.Model):
         readonly=True,
         help="Subject dimension."
     )
-    company_id = fields.Many2one(
-        comodel_name='res.company',
-        string='Company',
-        readonly=True,
-        help="Company dimension."
-    )
 
-    # === MEASURES (AGGREGATES) ===
+
+    #MEASURES (AGGREGATES)
     score = fields.Float(
         string='Score',
         readonly=True,
@@ -66,7 +61,7 @@ class UniversityReport(models.Model):
             CREATE OR REPLACE VIEW %s AS (
                 SELECT
                     row_number() OVER () AS id,
-                    u.company_id AS company_id,
+
                     u.id AS university_id,
                     p.id AS professor_id,
                     d.id AS department_id,

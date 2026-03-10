@@ -9,53 +9,44 @@ class TestConstraints(TransactionCase):
         super(TestConstraints, self).setUp()
         
         # We need a company
-        self.company = self.env.user.company_id
         
         self.uni_1 = self.env['university.university'].create({
-            'name': 'Uni Test 1',
-            'company_id': self.company.id
+            'name': 'Uni Test 1'
         })
         self.uni_2 = self.env['university.university'].create({
-            'name': 'Uni Test 2',
-            'company_id': self.company.id
+            'name': 'Uni Test 2'
         })
 
         self.dept_1 = self.env['university.department'].create({
             'name': 'Dept Test 1', 
-            'university_id': self.uni_1.id,
-            'company_id': self.company.id
+            'university_id': self.uni_1.id
         })
         self.dept_2 = self.env['university.department'].create({
             'name': 'Dept Test 2', 
-            'university_id': self.uni_2.id,
-            'company_id': self.company.id
+            'university_id': self.uni_2.id
         })
 
         self.prof_1 = self.env['university.professor'].create({
             'name': 'Prof Test 1', 
             'university_id': self.uni_1.id, 
-            'department_id': self.dept_1.id,
-            'company_id': self.company.id
+            'department_id': self.dept_1.id
         })
         self.prof_2 = self.env['university.professor'].create({
             'name': 'Prof Test 2', 
             'university_id': self.uni_2.id, 
-            'department_id': self.dept_2.id,
-            'company_id': self.company.id
+            'department_id': self.dept_2.id
         })
 
         self.student_1 = self.env['university.student'].create({
             'name': 'Student Test 1', 
             'email': 'stu1_test_cons@example.com', 
-            'university_id': self.uni_1.id,
-            'company_id': self.company.id
+            'university_id': self.uni_1.id
         })
         
         self.subject_1 = self.env['university.subject'].create({
             'name': 'Subj Test 1', 
             'code': 'S1_TEST', 
-            'department_id': self.dept_1.id,
-            'company_id': self.company.id
+            'department_id': self.dept_1.id
         })
 
     def test_director_constraint(self):
@@ -84,8 +75,7 @@ class TestConstraints(TransactionCase):
             self.env['university.enrollment'].create({
                 'student_id': self.student_1.id,
                 'university_id': self.uni_2.id,
-                'subject_id': self.subject_1.id,
-                'company_id': self.company.id
+                'subject_id': self.subject_1.id
             })
 
     def test_enrollment_professor_constraint(self):
@@ -95,6 +85,5 @@ class TestConstraints(TransactionCase):
                 'student_id': self.student_1.id,
                 'university_id': self.uni_1.id,
                 'subject_id': self.subject_1.id,
-                'professor_id': self.prof_2.id,
-                'company_id': self.company.id
+                'professor_id': self.prof_2.id
             })
