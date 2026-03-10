@@ -24,19 +24,20 @@ class University(models.Model):
         help="University email address."
     )
     company_id = fields.Many2one(
-        'res.company', string='Company', 
-        required=True, default=lambda self: self.env.company
+        'res.company', 
+        string='Company', 
+        required=True, 
+        default=lambda self: self.env.company
     )
 
-    #ADDRESS FIELDS 
+    # === ADDRESS FIELDS ===
     street = fields.Char(
         string='Street',
         help="Street address."
     )
     city = fields.Char(
         string='City',
-        index=True,
-        help="City."
+        help="City." 
     )
     country_id = fields.Many2one(
         comodel_name='res.country',
@@ -54,62 +55,55 @@ class University(models.Model):
         help="Postal code."
     )
 
-    # RELATIONAL FIELDS 
+    # === RELATIONAL FIELDS ===
     director_id = fields.Many2one(
         comodel_name='university.professor',
         string='Director',
+        domain="['|', ('university_id', '=', id), ('university_id', '=', False)]",
         help="Director de la universidad."
     )
     professor_ids = fields.One2many(
         comodel_name='university.professor',
         inverse_name='university_id',
-        string='Professors',
-        help="Professors employed by this university."
+        string='Professors'
     )
     student_ids = fields.One2many(
         comodel_name='university.student',
         inverse_name='university_id',
-        string='Students',
-        help="Students registered at this university."
+        string='Students'
     )
     enrollment_ids = fields.One2many(
         comodel_name='university.enrollment',
         inverse_name='university_id',
-        string='Enrollments',
-        help="All enrollments across all subjects."
+        string='Enrollments'
     )
     department_ids = fields.One2many(
         comodel_name='university.department',
         inverse_name='university_id',
-        string='Departments',
-        help="Departments within the university."
+        string='Departments'
     )
 
     # === COMPUTED FIELDS ===
     professor_count = fields.Integer(
         compute='_compute_counts',
-        string='Professor Count',
-        help="Total number of professors."
+        string='Professor Count'
     )
     student_count = fields.Integer(
         compute='_compute_counts',
-        string='Student Count',
-        help="Total number of students."
+        string='Student Count'
     )
     enrollment_count = fields.Integer(
         compute='_compute_counts',
-        string='Enrollment Count',
-        help="Total number of enrollments."
+        string='Enrollment Count'
     )
     department_count = fields.Integer(
         compute='_compute_counts',
-        string='Department Count',
-        help="Total number of departments."
+        string='Department Count'
     )
 
     @api.depends('professor_ids', 'student_ids', 'enrollment_ids', 'department_ids')
     def _compute_counts(self) -> None:
-        """Computes the number of related records for smart buttons."""
+        """Computes the number of related records for smart buttons without N+1 queries."""
         prof_map = self._get_batch_counts('university.professor', 'university_id')
         student_map = self._get_batch_counts('university.student', 'university_id')
         enroll_map = self._get_batch_counts('university.enrollment', 'university_id')
@@ -125,10 +119,12 @@ class University(models.Model):
     def _check_director_university(self) -> None:
         """
         Validates that the assigned director belongs to the university.
-
-        Raises:
-            ValidationError: If the director belongs to a different university.
+        Raises ValidationError if the constraint is violated.
         """
         for record in self:
-            if record.director_id and record.director_id.university_id != record:
+            if (
+                record.director_id
+                and record.director_id.university_id
+                and record.director_id.university_id != record
+            ):
                 raise ValidationError(_("The director must belong to the same university."))

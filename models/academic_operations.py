@@ -16,10 +16,13 @@ class Subject(models.Model):
     name = fields.Char(string='Name', required=True, index=True)
     code = fields.Char(string='Code', required=True, index=True)
 
-    department_id = fields.Many2one('university.department', string='Department', required=True, index=True, check_company=True)
+    department_id = fields.Many2one('university.department', string='Department', required=True, index=True)
     university_id = fields.Many2one(
-        'university.university', related='department_id.university_id', 
-        store=True, readonly=True, index=True, check_company=True
+        'university.university',
+        related='department_id.university_id',
+        store=True,
+        readonly=True,
+        index=True,
     )
     professor_ids = fields.Many2many('university.professor', string='Professors')
     enrollment_ids = fields.One2many('university.enrollment', 'subject_id', string='Enrollments')
@@ -56,10 +59,27 @@ class Enrollment(models.Model):
 
     code = fields.Char(string='Code', required=True, default='New', copy=False, index=True)
 
-    student_id = fields.Many2one('university.student', string='Student', required=True, index=True, check_company=True)
-    university_id = fields.Many2one('university.university', string='University', required=True, index=True, check_company=True)
-    professor_id = fields.Many2one('university.professor', string='Professor', index=True, check_company=True)
-    subject_id = fields.Many2one('university.subject', string='Subject', required=True, index=True, check_company=True)
+    student_id = fields.Many2one(
+        'university.student',
+        string='Student',
+        required=True,
+        index=True,
+        domain="[('university_id', '=', university_id)]",
+    )
+    university_id = fields.Many2one('university.university', string='University', required=True, index=True)
+    professor_id = fields.Many2one(
+        'university.professor',
+        string='Professor',
+        index=True,
+        domain="[('university_id', '=', university_id)]",
+    )
+    subject_id = fields.Many2one(
+        'university.subject',
+        string='Subject',
+        required=True,
+        index=True,
+        domain="[('university_id', '=', university_id)]",
+    )
     grade_ids = fields.One2many('university.grade', 'enrollment_id', string='Grades')
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
@@ -84,7 +104,11 @@ class Enrollment(models.Model):
             ValidationError: If the professor belongs to a different university.
         """
         for record in self:
-            if record.professor_id and record.professor_id.university_id != record.university_id:
+            if (
+                record.professor_id
+                and record.professor_id.university_id
+                and record.professor_id.university_id != record.university_id
+            ):
                 raise ValidationError(_("The professor must belong to the same university as the enrollment."))
 
     @api.constrains('student_id', 'university_id')
@@ -96,7 +120,11 @@ class Enrollment(models.Model):
             ValidationError: If the student belongs to a different university.
         """
         for record in self:
-            if record.student_id and record.student_id.university_id != record.university_id:
+            if (
+                record.student_id
+                and record.student_id.university_id
+                and record.student_id.university_id != record.university_id
+            ):
                 raise ValidationError(_("The student must belong to the same university as the enrollment."))
 
     @api.constrains('subject_id', 'university_id')
@@ -108,7 +136,11 @@ class Enrollment(models.Model):
             ValidationError: If the subject belongs to a different university.
         """
         for record in self:
-            if record.subject_id and record.subject_id.university_id != record.university_id:
+            if (
+                record.subject_id
+                and record.subject_id.university_id
+                and record.subject_id.university_id != record.university_id
+            ):
                 raise ValidationError(_("The subject must belong to the same university as the enrollment."))
 
     @api.model_create_multi
@@ -164,10 +196,12 @@ class Grade(models.Model):
     _name = 'university.grade'
     _description = 'Grade'
 
-    enrollment_id = fields.Many2one('university.enrollment', string='Enrollment', required=True, index=True, check_company=True)
+    enrollment_id = fields.Many2one('university.enrollment', string='Enrollment', required=True, index=True)
     student_id = fields.Many2one(
-        'university.student', related='enrollment_id.student_id', 
-        store=True, index=True, check_company=True
+        'university.student',
+        related='enrollment_id.student_id',
+        store=True,
+        index=True,
     )
 
     score = fields.Float(string='Score', index=True)

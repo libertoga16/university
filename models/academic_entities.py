@@ -14,8 +14,13 @@ class Department(models.Model):
     _description = 'Department'
 
     name = fields.Char(string='Name', required=True, index=True, help="Name of the department.")
-    university_id = fields.Many2one('university.university', string='University', required=True, index=True, check_company=True)
-    manager_id = fields.Many2one('university.professor', string='Manager', index=True, check_company=True)
+    university_id = fields.Many2one('university.university', string='University', required=True, index=True)
+    manager_id = fields.Many2one(
+        'university.professor',
+        string='Manager',
+        index=True,
+        domain="[('university_id', '=', university_id)]",
+    )
     professor_ids = fields.One2many('university.professor', 'department_id', string='Professors')
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
 
@@ -37,7 +42,11 @@ class Department(models.Model):
             ValidationError: If the manager belongs to a different university.
         """
         for record in self:
-            if record.manager_id and record.manager_id.university_id != record.university_id:
+            if (
+                record.manager_id
+                and record.manager_id.university_id
+                and record.manager_id.university_id != record.university_id
+            ):
                 raise ValidationError(_("The manager must belong to the same university as the department."))
 
 # Professor
@@ -50,8 +59,14 @@ class UniversityProfessor(models.Model):
     name = fields.Char(string='Name', required=True, index=True)
     email = fields.Char(string='Email', index=True)
     
-    university_id = fields.Many2one('university.university', string='University', required=True, index=True, check_company=True)
-    department_id = fields.Many2one('university.department', string='Department', required=True, index=True, check_company=True)
+    university_id = fields.Many2one('university.university', string='University', required=True, index=True)
+    department_id = fields.Many2one(
+        'university.department',
+        string='Department',
+        required=True,
+        index=True,
+        domain="[('university_id', '=', university_id)]",
+    )
     subject_ids = fields.Many2many('university.subject', string='Subjects')
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     enrollment_ids = fields.One2many('university.enrollment', 'professor_id', string='Enrollments')
@@ -76,8 +91,12 @@ class UniversityStudent(models.Model):
     name = fields.Char(string='Name', required=True, index=True)
     email = fields.Char(string='Email', required=True, index=True)
     
-    university_id = fields.Many2one('university.university', string='University', check_company=True)
-    tutor_id = fields.Many2one('university.professor', string='Tutor', check_company=True)
+    university_id = fields.Many2one('university.university', string='University')
+    tutor_id = fields.Many2one(
+        'university.professor',
+        string='Tutor',
+        domain="[('university_id', '=', university_id)]",
+    )
     company_id = fields.Many2one('res.company', string='Company', required=True, default=lambda self: self.env.company)
     
     enrollment_ids = fields.One2many('university.enrollment', 'student_id', string='Enrollments')
@@ -107,7 +126,11 @@ class UniversityStudent(models.Model):
             ValidationError: If the tutor belongs to a different university.
         """
         for record in self:
-            if record.tutor_id and record.tutor_id.university_id != record.university_id:
+            if (
+                record.tutor_id
+                and record.tutor_id.university_id
+                and record.tutor_id.university_id != record.university_id
+            ):
                 raise ValidationError(_("The tutor must belong to the same university as the student."))
 
     @api.model_create_multi
