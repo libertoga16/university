@@ -17,7 +17,9 @@ export class StudentEmailWidget extends Component {
         </button>
     `;
     static props = { ...standardWidgetProps };
-
+    /**
+     * Record is the active form
+     */
     setup() {
         this.orm = useService("orm");
         this.notification = useService("notification");
@@ -32,7 +34,7 @@ export class StudentEmailWidget extends Component {
      * @returns {Promise<void>}
      */
     async onClickSend() {
-        if (this.props.record.isDirty) {//Automaticlly save
+        if (this.props.record.isDirty) { // Automatically save
             await this.props.record.save();
         }
 
@@ -67,6 +69,6 @@ export class StudentEmailWidget extends Component {
     }
 }
 
-registry.category("view_widgets").add("student_send_email", {//poder insteralo en etiquetas xml
+registry.category("view_widgets").add("student_send_email", { // allows inserting it in XML view tags
     component: StudentEmailWidget,
 });

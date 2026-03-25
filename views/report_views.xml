@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- PIVOT VIEW -->
+ 
     <record id="university_report_view_pivot" model="ir.ui.view">
         <field name="name">university.report.view.pivot</field>
         <field name="model">university.report</field>
         <field name="arch" type="xml">
-            <pivot string="Análisis Académico" sample="1">
+            <pivot string="Academic Analysis" sample="1">
                 <field name="student_id" type="row"/>
                 <field name="university_id" type="col"/>
                 <field name="score" type="measure"/>
@@ -13,7 +13,7 @@
         </field>
     </record>
 
-    <!-- GRAPH VIEW -->
+    
     <record id="university_report_view_graph" model="ir.ui.view">
         <field name="name">university.report.view.graph</field>
         <field name="model">university.report</field>
@@ -25,7 +25,7 @@
         </field>
     </record>
 
-    <!-- SEARCH VIEW -->
+
     <record id="university_report_view_search" model="ir.ui.view">
         <field name="name">university.report.view.search</field>
         <field name="model">university.report</field>

@@ -1,5 +1,4 @@
 import logging
-from typing import Any, Dict, List, Optional
 
 from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError
@@ -24,8 +23,6 @@ class University(models.Model):
         help="University email address."
     )
 
-
-    # ADDRESS FIELDS
     street = fields.Char(
         string='Street',
         help="Street address."
@@ -50,12 +47,11 @@ class University(models.Model):
         help="Postal code."
     )
 
-    # RELATIONAL FIELDS
     director_id = fields.Many2one(
         comodel_name='university.professor',
         string='Director',
-        domain="['|', ('university_id', '=', id), ('university_id', '=', False)]",
-        help="Director de la universidad."
+        domain="[('university_id', '=', id)]",
+        help="Director of the university."
     )
     professor_ids = fields.One2many(
         comodel_name='university.professor',
@@ -78,7 +74,6 @@ class University(models.Model):
         string='Departments'
     )
 
-    # COMPUTED FIELDS
     professor_count = fields.Integer(
         compute='_compute_counts',
         string='Professor Count'
@@ -117,9 +112,5 @@ class University(models.Model):
         Raises ValidationError if the constraint is violated.
         """
         for record in self:
-            if (
-                record.director_id
-                and record.director_id.university_id
-                and record.director_id.university_id != record
-            ):
+            if record.director_id and record.director_id.university_id != record:
                 raise ValidationError(_("The director must belong to the same university."))

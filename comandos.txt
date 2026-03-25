@@ -1,0 +1,11 @@
+docker exec 2b odoo -c /etc/odoo/odoo.conf \
+  --db_host=postgres_16-postgres-1 \
+  --db_port=5432 \
+  --db_user=odoo \
+  --db_password=odoo \
+  -d 19_Universidad \
+  --test-enable -u university --stop-after-init --log-level=test \
+  --workers=0 \
+  --http-port=8888
+
+docker logs -f -n 100 2b

@@ -12,8 +12,8 @@
             <field name="report_template_ids" eval="[(6, 0, [ref('university.action_report_student')])]"/>
 
             <field name="body_html" type="html">
-                <div style="margin: 0px; padding: 0px;">
-                    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+                <div>
+                    <p>
                         Dear <t t-out="object.name"/>,
                         <br/><br/>
                         Please find attached your latest <strong>Academic Report</strong> issued by <strong t-out="object.university_id.name"/>.

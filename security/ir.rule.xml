@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
-        <!-- Regla para que el usuario portal solo vea sus propias notas -->
+    <data noupdate="1">
+        <!-- Portal users can only read grades linked to their own student profile -->
         <record id="rule_grade_portal" model="ir.rule">
             <field name="name">Portal User Own Grades</field>
             <field name="model_id" ref="model_university_grade"/>
@@ -12,8 +12,8 @@
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
-        
-        <!-- Regla para que el usuario portal vea su estudiante -->
+
+        <!-- Portal users can only read their own student record -->
         <record id="rule_student_portal" model="ir.rule">
             <field name="name">Portal User Own Student Profile</field>
             <field name="model_id" ref="model_university_student"/>
@@ -25,7 +25,7 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Regla para que el usuario portal vea sus propias inscripciones -->
+        <!-- Portal users can only read enrollments belonging to their student profile -->
         <record id="rule_enrollment_portal" model="ir.rule">
             <field name="name">Portal User Own Enrollments</field>
             <field name="model_id" ref="model_university_enrollment"/>
@@ -37,7 +37,7 @@
             <field name="perm_unlink" eval="False"/>
         </record>
 
-        <!-- Regla para que el usuario portal vea las asignaturas en las que está inscrito -->
+        <!-- Portal users can only read subjects they are enrolled in -->
         <record id="rule_subject_portal" model="ir.rule">
             <field name="name">Portal User Own Subjects</field>
             <field name="model_id" ref="model_university_subject"/>
@@ -48,7 +48,6 @@
             <field name="perm_create" eval="False"/>
             <field name="perm_unlink" eval="False"/>
         </record>
-
 
     </data>
 </odoo>

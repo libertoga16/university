@@ -2,38 +2,40 @@ from odoo.tests.common import TransactionCase, tagged
 
 @tagged('university')
 class TestUniversityCounts(TransactionCase):
-    
-    def setUp(self):
-        super(TestUniversityCounts, self).setUp()
-        self.university = self.env['university.university'].create({'name': 'Test University'})
-        self.department = self.env['university.department'].create({
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.university = cls.env['university.university'].create({'name': 'Test University'})
+        cls.department = cls.env['university.department'].create({
             'name': 'Test Department',
-            'university_id': self.university.id
+            'university_id': cls.university.id
         })
-        self.professor = self.env['university.professor'].create({
+        cls.professor = cls.env['university.professor'].create({
             'name': 'Test Professor',
-            'university_id': self.university.id,
-            'department_id': self.department.id
+            'university_id': cls.university.id,
+            'department_id': cls.department.id
         })
-        self.subject = self.env['university.subject'].create({
+        cls.subject = cls.env['university.subject'].create({
             'name': 'Test Subject',
             'code': 'TES101',
-            'university_id': self.university.id,
-            'department_id': self.department.id,
-            'professor_ids': [(4, self.professor.id)]
+            'university_id': cls.university.id,
+            'department_id': cls.department.id,
+            'professor_ids': [(4, cls.professor.id)]
         })
-        self.student = self.env['university.student'].create({
+        cls.student = cls.env['university.student'].create({
             'name': 'Test Student',
-            'university_id': self.university.id
+            'email': 'test_student_opt@example.com',
+            'university_id': cls.university.id
         })
-        self.enrollment = self.env['university.enrollment'].create({
-            'student_id': self.student.id,
-            'subject_id': self.subject.id,
-            'professor_id': self.professor.id,
-            'university_id': self.university.id
+        cls.enrollment = cls.env['university.enrollment'].create({
+            'student_id': cls.student.id,
+            'subject_id': cls.subject.id,
+            'professor_id': cls.professor.id,
+            'university_id': cls.university.id
         })
-        self.grade = self.env['university.grade'].create({
-            'enrollment_id': self.enrollment.id,
+        cls.grade = cls.env['university.grade'].create({
+            'enrollment_id': cls.enrollment.id,
             'score': 10.0
         })
 

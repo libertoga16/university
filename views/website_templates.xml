@@ -1,70 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
+    <!-- Public university listing page: /universidad -->
     <template id="website_uni_list" name="Universities">
         <t t-call="website.layout">
-            <div class="container mt-5 mb-5">
-                <h1 class="text-center mb-5 display-4">Nuestras Universidades</h1>
-                <div class="row">
+            <div class="container py-5">
+                <!-- Page title -->
+                <div class="text-center mb-5">
+                    <h1 class="o_uni_page_title display-5 mb-2">
+                        Our <span>Universities</span>
+                    </h1>
+                    <p class="text-muted fs-5">Explore our network of academic institutions</p>
+                </div>
+
+                <!-- University grid -->
+                <div class="row g-4">
                     <t t-foreach="universities" t-as="uni">
-                        <div class="col-lg-4 col-md-6 mb-4">
-                            <a t-attf-href="/universidad/#{uni.id}" class="text-decoration-none text-reset">
-                                <div class="card h-100 shadow-sm border-0 transition-hover">
-                                    <div class="card-img-top d-flex align-items-center justify-content-center bg-light" style="height: 250px; overflow: hidden;">
-                                        <img t-if="uni.image_1920" 
-                                             t-attf-src="/web/image/university.university/#{uni.id}/image_1920" 
-                                             class="img-fluid" 
-                                             style="max-height: 100%; max-width: 100%; object-fit: contain;" 
-                                             alt="University Image"/>
-                                        <i t-else="" class="fa fa-university fa-5x text-muted"/>
-                                    </div>
-                                    <div class="card-body text-center">
-                                        <h3 class="card-title font-weight-bold" t-field="uni.name"/>
+                        <div class="col-lg-4 col-md-6">
+                            <a t-attf-href="/universidad/#{uni.id}" class="o_uni_university_card d-block h-100 text-decoration-none">
+                                <!-- Hero image -->
+                                <div class="o_uni_card_img_wrap">
+                                    <img t-if="uni.image_1920"
+                                         t-attf-src="/web/image/university.university/#{uni.id}/image_1920"
+                                         alt="University Image"/>
+                                    <i t-else="" class="fa fa-university o_uni_card_fallback_icon" title="University"/>
+                                </div>
+                                <!-- Card body -->
+                                <div class="o_uni_card_body">
+                                    <div class="d-flex align-items-start justify-content-between gap-2">
+                                        <div class="overflow-hidden">
+                                            <h3 class="o_uni_card_title" t-field="uni.name"/>
+                                            <p t-if="uni.city" class="o_uni_card_location mb-0">
+                                                <i class="fa fa-map-marker"/>
+                                                <span t-field="uni.city"/>
+                                            </p>
+                                        </div>
+                                        <i class="fa fa-chevron-right o_uni_card_arrow mt-1"/>
                                     </div>
                                 </div>
                             </a>
                         </div>
                     </t>
                 </div>
+
+                <!-- Empty state -->
+                <div t-if="not universities" class="o_uni_empty_state">
+                    <i class="fa fa-university o_uni_empty_icon"/>
+                    <div class="o_uni_empty_title">No universities registered yet</div>
+                    <div class="o_uni_empty_sub">Check back later or contact the administrator</div>
+                </div>
             </div>
         </t>
     </template>
 
-
+    <!-- Professor directory for a specific university: /universidad/<id> -->
     <template id="website_prof_list" name="Professors">
         <t t-call="website.layout">
-            <div class="container mt-5 mb-5">
-                <div class="d-flex justify-content-between align-items-center mb-5">
-                    <a href="/universidad" class="btn btn-outline-secondary"><i class="fa fa-arrow-left"/> Volver</a>
-                    <h2 class="mb-0">Profesores de <span t-field="university.name"/></h2>
+            <div class="container py-5">
+                <!-- Header row: back button + title -->
+                <div class="d-flex align-items-center gap-3 mb-5 flex-wrap">
+                    <a href="/universidad" class="o_uni_back_btn btn btn-outline-secondary">
+                        <i class="fa fa-arrow-left me-1"/> Back
+                    </a>
+                    <h2 class="o_uni_section_title mb-0">
+                        Professors —
+                        <span class="o_uni_section_title_accent" t-field="university.name"/>
+                    </h2>
                 </div>
-                
-                <div class="row">
+
+                <!-- Professor grid -->
+                <div class="row g-4">
                     <t t-foreach="professors" t-as="prof">
-                        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                            <div class="card h-100 border-0 shadow-sm">
-                                <div class="card-img-top d-flex align-items-center justify-content-center bg-white pt-4 pb-2">
-                                    <img t-if="prof.image_128" 
-                                         t-attf-src="/web/image/university.professor/#{prof.id}/image_128" 
-                                         class="rounded-circle shadow-sm" 
-                                         style="width: 120px; height: 120px; object-fit: cover;"
-                                         alt="Professor Image"/>
-                                    <div t-else="" class="rounded-circle bg-light d-flex align-items-center justify-content-center shadow-sm" style="width: 120px; height: 120px;">
-                                        <i class="fa fa-user fa-3x text-muted"/>
+                        <div class="col-xl-3 col-lg-4 col-sm-6">
+                            <div class="o_uni_professor_card h-100">
+                                <!-- Circular avatar -->
+                                <div class="o_uni_prof_avatar_wrap">
+                                    <div t-if="prof.image_128" class="o_uni_prof_avatar">
+                                        <img t-attf-src="/web/image/university.professor/#{prof.id}/image_128"
+                                             alt="Professor"/>
+                                    </div>
+                                    <div t-else="" class="o_uni_prof_avatar o_uni_prof_avatar_placeholder">
+                                        <i class="fa fa-user" title="Professor"/>
                                     </div>
                                 </div>
-                                <div class="card-body text-center">
-                                    <h5 class="card-title font-weight-bold mb-1" t-field="prof.name"/>
-                                    <p class="text-muted small mb-0" t-if="prof.email">
-                                        <i class="fa fa-envelope"/> <span t-field="prof.email"/>
+                                <!-- Info body -->
+                                <div class="o_uni_prof_body pt-3">
+                                    <p class="o_uni_prof_name" t-field="prof.name"/>
+                                    <p t-if="prof.email" class="o_uni_prof_email mb-0">
+                                        <i class="fa fa-envelope me-1"/>
+                                        <a t-attf-href="mailto:#{prof.email}" t-field="prof.email"/>
                                     </p>
                                 </div>
                             </div>
                         </div>
                     </t>
                 </div>
-                
-                <div t-if="not professors" class="alert alert-info text-center mt-4">
-                    <i class="fa fa-info-circle"/> No hay profesores registrados en esta universidad actualmente.
+
+                <!-- Empty state -->
+                <div t-if="not professors" class="o_uni_empty_state">
+                    <i class="fa fa-users o_uni_empty_icon"/>
+                    <div class="o_uni_empty_title">No professors registered yet</div>
+                    <div class="o_uni_empty_sub">This university has no professors listed at this time</div>
                 </div>
             </div>
         </t>

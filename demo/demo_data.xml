@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data noupdate="0">
+    <data noupdate="1">
         <record id="test_uni_tech" model="university.university">
             <field name="name">Tech University</field>
             <field name="city">Silicon Valley</field>

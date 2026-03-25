@@ -1,0 +1,394 @@
+
+// UNIVERSITY MODULE — Website & Portal Styles
+
+// Scope: public /universidad pages + /my/grades portal section
+// Uses Bootstrap 5 (bundled by Odoo website) — zero custom media queries needed
+// All image containers use explicit dimensions so pages don't jump on load
+
+
+$o-uni-blue:          #2d6cdf;
+$o-uni-blue-light:    rgba(45, 108, 223, 0.08);
+$o-uni-radius:        14px;
+$o-uni-transition:    all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+$o-uni-shadow-card:   0 2px 12px rgba(0, 0, 0, 0.07);
+$o-uni-shadow-hover:  0 12px 32px rgba(45, 108, 223, 0.18);
+
+
+
+// WEBSITE — University listing page  /universidad
+
+
+.o_uni_page_title {
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    color: #1e2a3b;
+
+    span {
+        color: $o-uni-blue;
+    }
+}
+
+// University card — hero image + clean text body
+.o_uni_university_card {
+    border-radius: $o-uni-radius;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    overflow: hidden;
+    box-shadow: $o-uni-shadow-card;
+    transition: $o-uni-transition;
+    background: #fff;
+    text-decoration: none !important;
+    color: inherit !important;
+    display: block;
+
+    &:hover {
+        transform: translateY(-5px);
+        box-shadow: $o-uni-shadow-hover;
+        border-color: rgba($o-uni-blue, 0.2);
+
+        .o_uni_card_img_wrap img {
+            transform: scale(1.04);
+        }
+
+        .o_uni_card_arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+}
+
+// Fixed-height image container — prevents layout shift while image loads
+.o_uni_card_img_wrap {
+    height: 210px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #eaf0fb 0%, #dbeafe 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+        display: block;
+    }
+
+    .o_uni_card_fallback_icon {
+        font-size: 56px;
+        color: rgba($o-uni-blue, 0.35);
+    }
+}
+
+.o_uni_card_body {
+    padding: 18px 20px 16px;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.o_uni_card_title {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1e2a3b;
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_uni_card_location {
+    font-size: 13px;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.o_uni_card_arrow {
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    color: $o-uni-blue;
+    font-size: 13px;
+}
+
+
+// =============================================================================
+// WEBSITE — Professor listing page  /universidad/<id>
+// =============================================================================
+
+.o_uni_back_btn {
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 13px;
+    padding: 8px 16px;
+    border-color: #d1d5db;
+    color: #374151;
+    transition: $o-uni-transition;
+
+    &:hover {
+        background: $o-uni-blue;
+        border-color: $o-uni-blue;
+        color: #fff;
+        transform: translateX(-2px);
+    }
+}
+
+.o_uni_section_title {
+    font-size: 26px;
+    font-weight: 800;
+    color: #1e2a3b;
+    letter-spacing: -0.3px;
+
+    .o_uni_section_title_accent {
+        color: $o-uni-blue;
+    }
+}
+
+// Professor card — circular avatar centered, info below
+.o_uni_professor_card {
+    border-radius: $o-uni-radius;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    box-shadow: $o-uni-shadow-card;
+    overflow: hidden;
+    background: #fff;
+    transition: $o-uni-transition;
+    text-align: center;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: $o-uni-shadow-hover;
+        border-color: rgba($o-uni-blue, 0.2);
+
+        .o_uni_prof_avatar img,
+        .o_uni_prof_avatar .o_uni_prof_avatar_placeholder {
+            border-color: rgba($o-uni-blue, 0.4);
+        }
+    }
+}
+
+.o_uni_prof_avatar_wrap {
+    padding: 28px 20px 16px;
+    display: flex;
+    justify-content: center;
+}
+
+.o_uni_prof_avatar {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.10);
+    transition: border-color 0.2s ease;
+    background: #f1f5f9;
+    flex-shrink: 0;
+
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    &.o_uni_prof_avatar_placeholder {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #eaf0fb, #dbeafe);
+        font-size: 36px;
+        color: $o-uni-blue;
+    }
+}
+
+.o_uni_prof_body {
+    padding: 0 16px 20px;
+    border-top: 1px solid rgba(0, 0, 0, 0.04);
+}
+
+.o_uni_prof_name {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e2a3b;
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.o_uni_prof_email {
+    font-size: 12.5px;
+    color: #64748b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    a {
+        color: $o-uni-blue;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+}
+
+// Empty state — no professors found
+.o_uni_empty_state {
+    padding: 64px 24px;
+    text-align: center;
+
+    .o_uni_empty_icon {
+        font-size: 48px;
+        color: #cbd5e1;
+        margin-bottom: 16px;
+    }
+
+    .o_uni_empty_title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 8px;
+    }
+
+    .o_uni_empty_sub {
+        font-size: 14px;
+        color: #94a3b8;
+    }
+}
+
+
+
+// PORTAL — /my/grades — Grade history table
+
+
+// Section entry in the portal homepage (the "Grades" tile)
+.o_uni_portal_tile {
+    border-radius: 12px !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.18s ease, transform 0.18s ease;
+
+    &:hover {
+        box-shadow: 0 8px 24px rgba($o-uni-blue, 0.14);
+        transform: translateY(-2px);
+    }
+
+    .o_uni_tile_icon_wrap {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        background: $o-uni-blue-light;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: $o-uni-blue;
+        font-size: 20px;
+        flex-shrink: 0;
+        transition: background 0.18s ease;
+    }
+
+    &:hover .o_uni_tile_icon_wrap {
+        background: rgba($o-uni-blue, 0.16);
+    }
+}
+
+// Grades page — card wrapper
+.o_uni_grades_card {
+    border-radius: $o-uni-radius !important;
+    border: 1px solid rgba(0, 0, 0, 0.06) !important;
+    box-shadow: $o-uni-shadow-card;
+    overflow: hidden;
+}
+
+// Table header
+.o_uni_grades_table {
+    thead th {
+        background: #f8fafc;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.7px;
+        color: #64748b;
+        border-bottom: 2px solid #e2e8f0 !important;
+        padding: 14px 18px !important;
+    }
+
+    tbody tr {
+        transition: background-color 0.12s ease;
+
+        &:hover td {
+            background-color: $o-uni-blue-light;
+        }
+
+        td {
+            padding: 13px 18px !important;
+            vertical-align: middle !important;
+            border-color: #f1f5f9 !important;
+        }
+
+        &:last-child td {
+            border-bottom: none !important;
+        }
+    }
+}
+
+// Subject name in grades table — slightly bolder
+.o_uni_grade_subject {
+    font-weight: 600;
+    color: #1e2a3b;
+}
+
+// Score value — larger and colored
+.o_uni_grade_score_val {
+    font-size: 16px;
+    font-weight: 800;
+    letter-spacing: -0.3px;
+}
+
+// Status badges — pill style
+.o_uni_badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+
+    &.distinction {
+        background: rgba(217, 119, 6, 0.10);
+        color: #b45309;
+        border: 1px solid rgba(217, 119, 6, 0.22);
+    }
+
+    &.pass {
+        background: rgba(5, 150, 105, 0.09);
+        color: #047857;
+        border: 1px solid rgba(5, 150, 105, 0.2);
+    }
+
+    &.fail {
+        background: rgba(220, 38, 38, 0.08);
+        color: #b91c1c;
+        border: 1px solid rgba(220, 38, 38, 0.18);
+    }
+}
+
+// Empty state inside grades table
+.o_uni_grades_empty {
+    padding: 56px 24px;
+    text-align: center;
+    color: #94a3b8;
+
+    i {
+        font-size: 40px;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    p {
+        margin: 0;
+        font-size: 15px;
+    }
+}

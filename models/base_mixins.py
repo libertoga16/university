@@ -1,15 +1,15 @@
 import logging
-from typing import Dict
+
 from odoo import models
 
 _logger = logging.getLogger(__name__)
 
 class BatchCountMixin(models.AbstractModel):
-    """Efficient batch counting mixin for related records."""
+    """Efficient batch counting mixin for related records. N+1"""
     _name = 'batch.count.mixin'
     _description = 'Batch Count Mixin'
 
-    def _get_batch_counts(self, model_name: str, field_name: str) -> Dict[int, int]:
+    def _get_batch_counts(self, model_name: str, field_name: str) -> dict[int, int]:
         """
         Calculates the count of records grouped by a relational field.
         
@@ -18,7 +18,7 @@ class BatchCountMixin(models.AbstractModel):
             field_name (str): Relational field to group by.
 
         Returns:
-            Dict[int, int]: Mapping of record IDs to their count.
+            dict[int, int]: Mapping of record IDs to their count.
         """
         if not self.ids:
             return {}

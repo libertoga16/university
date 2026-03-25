@@ -13,19 +13,28 @@
                         </h1>
                     </div>
                     <group>
-                        <group name="main_info">
-                            <field name="student_id" domain="[('university_id', '=', university_id)]"/>
-                            <field name="subject_id" domain="[('university_id', '=', university_id)]"/>
-                        </group>
                         <group name="org_info">
                             <field name="university_id"/>
-                            <field name="professor_id" widget="many2one_avatar" domain="[('university_id', '=', university_id)]"/>
+                            <field name="student_id"
+                                   domain="[('university_id', '=', university_id)]"
+                                   readonly="not university_id"/>
+                        </group>
+                        <group name="main_info">
+                            <field name="subject_id"
+                                   domain="[('university_id', '=', university_id)]"
+                                   readonly="not university_id"/>
+                            <field name="professor_id" widget="many2one_avatar"
+                                   domain="[('university_id', '=', university_id), ('subject_ids', 'in', [subject_id])]"
+                                   readonly="not subject_id"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Grades" name="grades">
                             <field name="grade_ids">
-                                <list editable="bottom">
+                                <list editable="bottom"
+                                      decoration-danger="score &lt; 5"
+                                      decoration-success="score &gt;= 5">
+                                    <field name="date"/>
                                     <field name="score"/>
                                 </list>
                             </field>
@@ -56,25 +65,32 @@
         <field name="name">university.enrollment.view.kanban</field>
         <field name="model">university.enrollment</field>
         <field name="arch" type="xml">
-            <kanban>
+            <kanban class="o_uni_kanban" sample="1">
                 <field name="code"/>
                 <field name="student_id"/>
                 <field name="subject_id"/>
                 <field name="professor_id"/>
                 <templates>
                     <t t-name="card">
-                        <div class="d-flex mb-2" style="justify-content: space-between;">
-                            <field name="code" class="fw-bolder fs-5"/>
-                        </div>
-                        <div class="mb-2 text-muted">
-                            <div><field name="student_id"/></div>
-                            <div><field name="subject_id"/></div>
-                        </div>
-                        <footer>
-                            <div class="d-flex justify-content-end">
-                                <field name="professor_id" widget="many2one_avatar_user"/>
+                        <div class="o_uni_enrollment_card">
+                            <!-- Enrollment code — monospace, brand colored -->
+                            <div class="o_uni_enrollment_code mb-2">
+                                <field name="code"/>
                             </div>
-                        </footer>
+                            <!-- Student and subject -->
+                            <div class="o_uni_enrollment_meta">
+                                <i class="fa fa-user me-1 text-muted small"/>
+                                <field name="student_id"/>
+                            </div>
+                            <div class="o_uni_enrollment_sub mt-1">
+                                <i class="fa fa-book me-1 text-muted small"/>
+                                <field name="subject_id"/>
+                            </div>
+                            <!-- Professor avatar footer -->
+                            <footer class="d-flex justify-content-end mt-2 pt-2 border-top">
+                                <field name="professor_id" widget="many2one_avatar"/>
+                            </footer>
+                        </div>
                     </t>
                 </templates>
             </kanban>
@@ -82,7 +98,7 @@
     </record>
 
     <!-- SEARCH VIEW -->
-     <record id="university_enrollment_view_search" model="ir.ui.view">
+    <record id="university_enrollment_view_search" model="ir.ui.view">
         <field name="name">university.enrollment.view.search</field>
         <field name="model">university.enrollment</field>
         <field name="arch" type="xml">
@@ -90,7 +106,13 @@
                 <field name="code"/>
                 <field name="student_id"/>
                 <field name="university_id"/>
+                <!-- professor_id and subject_id required for smart button context filters -->
+                <field name="professor_id"/>
+                <field name="subject_id"/>
+                <separator/>
                 <filter string="University" name="group_university" context="{'group_by':'university_id'}"/>
+                <filter string="Subject" name="group_subject" context="{'group_by':'subject_id'}"/>
+                <filter string="Professor" name="group_professor" context="{'group_by':'professor_id'}"/>
             </search>
         </field>
     </record>

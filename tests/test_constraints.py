@@ -5,48 +5,47 @@ import logging
 _logger = logging.getLogger(__name__)
 
 class TestConstraints(TransactionCase):
-    def setUp(self):
-        super(TestConstraints, self).setUp()
-        
-        # We need a company
-        
-        self.uni_1 = self.env['university.university'].create({
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+
+        cls.uni_1 = cls.env['university.university'].create({
             'name': 'Uni Test 1'
         })
-        self.uni_2 = self.env['university.university'].create({
+        cls.uni_2 = cls.env['university.university'].create({
             'name': 'Uni Test 2'
         })
 
-        self.dept_1 = self.env['university.department'].create({
-            'name': 'Dept Test 1', 
-            'university_id': self.uni_1.id
+        cls.dept_1 = cls.env['university.department'].create({
+            'name': 'Dept Test 1',
+            'university_id': cls.uni_1.id
         })
-        self.dept_2 = self.env['university.department'].create({
-            'name': 'Dept Test 2', 
-            'university_id': self.uni_2.id
-        })
-
-        self.prof_1 = self.env['university.professor'].create({
-            'name': 'Prof Test 1', 
-            'university_id': self.uni_1.id, 
-            'department_id': self.dept_1.id
-        })
-        self.prof_2 = self.env['university.professor'].create({
-            'name': 'Prof Test 2', 
-            'university_id': self.uni_2.id, 
-            'department_id': self.dept_2.id
+        cls.dept_2 = cls.env['university.department'].create({
+            'name': 'Dept Test 2',
+            'university_id': cls.uni_2.id
         })
 
-        self.student_1 = self.env['university.student'].create({
-            'name': 'Student Test 1', 
-            'email': 'stu1_test_cons@example.com', 
-            'university_id': self.uni_1.id
+        cls.prof_1 = cls.env['university.professor'].create({
+            'name': 'Prof Test 1',
+            'university_id': cls.uni_1.id,
+            'department_id': cls.dept_1.id
         })
-        
-        self.subject_1 = self.env['university.subject'].create({
-            'name': 'Subj Test 1', 
-            'code': 'S1_TEST', 
-            'department_id': self.dept_1.id
+        cls.prof_2 = cls.env['university.professor'].create({
+            'name': 'Prof Test 2',
+            'university_id': cls.uni_2.id,
+            'department_id': cls.dept_2.id
+        })
+
+        cls.student_1 = cls.env['university.student'].create({
+            'name': 'Student Test 1',
+            'email': 'stu1_test_cons@example.com',
+            'university_id': cls.uni_1.id
+        })
+
+        cls.subject_1 = cls.env['university.subject'].create({
+            'name': 'Subj Test 1',
+            'code': 'S1_TEST',
+            'department_id': cls.dept_1.id
         })
 
     def test_director_constraint(self):
@@ -86,4 +85,44 @@ class TestConstraints(TransactionCase):
                 'university_id': self.uni_1.id,
                 'subject_id': self.subject_1.id,
                 'professor_id': self.prof_2.id
+            })
+
+    def test_enrollment_unique_student_subject_sql_constraint(self):
+        """SQL UNIQUE(student_id, subject_id): duplicate enrollment must be rejected at DB level."""
+        self.env['university.enrollment'].create({
+            'student_id': self.student_1.id,
+            'university_id': self.uni_1.id,
+            'subject_id': self.subject_1.id,
+        })
+        with self.assertRaises(ValidationError):
+            self.env['university.enrollment'].create({
+                'student_id': self.student_1.id,
+                'university_id': self.uni_1.id,
+                'subject_id': self.subject_1.id,
+            })
+
+    def test_grade_score_below_zero_sql_constraint(self):
+        """SQL CHECK(score >= 0 AND score <= 10): score below 0 must be rejected at DB level."""
+        enrollment = self.env['university.enrollment'].create({
+            'student_id': self.student_1.id,
+            'university_id': self.uni_1.id,
+            'subject_id': self.subject_1.id,
+        })
+        with self.assertRaises(ValidationError):
+            self.env['university.grade'].create({
+                'enrollment_id': enrollment.id,
+                'score': -0.1,
+            })
+
+    def test_grade_score_above_ten_sql_constraint(self):
+        """SQL CHECK(score >= 0 AND score <= 10): score above 10 must be rejected at DB level."""
+        enrollment = self.env['university.enrollment'].create({
+            'student_id': self.student_1.id,
+            'university_id': self.uni_1.id,
+            'subject_id': self.subject_1.id,
+        })
+        with self.assertRaises(ValidationError):
+            self.env['university.grade'].create({
+                'enrollment_id': enrollment.id,
+                'score': 10.1,
             })

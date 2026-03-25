@@ -21,7 +21,6 @@ Key Features:
 * Grade tracking and reporting
     """,
     'author': 'Liberto',
-    'website': 'https://www.example.com',
     'license': 'LGPL-3',
     'depends': [
         'base',
@@ -33,7 +32,7 @@ Key Features:
         'security/ir.model.access.csv',
         'security/ir.rule.xml',
         'data/ir_cron_data.xml',
-        'reports/student_report.xml',
+        'pdf/student_pdf.xml',
         'data/mail_template_data.xml',
         'views/university_actions.xml',
         'views/enrollment_views.xml',
@@ -45,7 +44,6 @@ Key Features:
         'views/report_views.xml',
         'views/website_templates.xml',
         'views/portal_templates.xml',
-        'wizards/enrollment_wizard_views.xml',
         'views/university_views.xml',
         'views/university_menus.xml',
         ],
@@ -54,7 +52,11 @@ Key Features:
     ],
     'assets': {
         'web.assets_backend': [
+            'university/static/src/scss/university_backend.scss',
             'university/static/src/js/student_email_widget.js',
+        ],
+        'web.assets_frontend': [
+            'university/static/src/scss/university_website.scss',
         ],
     },
     'installable': True,

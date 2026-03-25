@@ -3,3 +3,4 @@ from . import university
 from . import academic_entities
 from . import academic_operations
 from . import report
+from . import student_pdf

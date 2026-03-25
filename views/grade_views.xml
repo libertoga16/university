@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- FORM VIEW -->
+    
     <record id="university_grade_view_form" model="ir.ui.view">
         <field name="name">university.grade.view.form</field>
         <field name="model">university.grade</field>
@@ -13,6 +13,7 @@
                             <field name="student_id" readonly="1"/>
                         </group>
                         <group name="score_info">
+                            <field name="date"/>
                             <field name="score"/>
                         </group>
                     </group>
@@ -21,12 +22,13 @@
         </field>
     </record>
 
-    <!-- LIST VIEW -->
+   
     <record id="university_grade_view_list" model="ir.ui.view">
         <field name="name">university.grade.view.list</field>
         <field name="model">university.grade</field>
         <field name="arch" type="xml">
             <list editable="bottom" decoration-danger="score &lt; 5" decoration-success="score &gt;= 5">
+                <field name="date"/>
                 <field name="enrollment_id"/>
                 <field name="student_id"/>
                 <field name="score"/>
@@ -34,27 +36,43 @@
         </field>
     </record>
 
-    <!-- KANBAN VIEW -->
+
     <record id="university_grade_view_kanban" model="ir.ui.view">
         <field name="name">university.grade.view.kanban</field>
         <field name="model">university.grade</field>
         <field name="arch" type="xml">
-            <kanban>
+            <kanban class="o_uni_kanban" sample="1">
                 <field name="id"/>
                 <field name="enrollment_id"/>
                 <field name="student_id"/>
                 <field name="score"/>
                 <templates>
                     <t t-name="card">
-                        <div class="d-flex mb-2" style="justify-content: space-between;">
-                            <field name="enrollment_id" class="fw-bolder fs-5"/>
-                        </div>
-                        <footer>
-                            <div class="d-flex justify-content-between text-muted w-100">
-                                <div><field name="student_id"/></div>
-                                <div><field name="score"/></div>
+                        <div class="o_uni_grade_card">
+                            <div class="d-flex align-items-start justify-content-between">
+                                <!-- Score: large, color-coded. JS ternary required in OWL kanban context -->
+                                <div>
+                                    <div t-attf-class="o_uni_grade_score {{ record.score.raw_value >= 9 ? 'merit' : (record.score.raw_value >= 5 ? 'pass' : 'fail') }}">
+                                        <!-- t-options forbidden in kanban (OWL); use plain field — precision set on model -->
+                                        <field name="score"/>
+                                    </div>
+                                    <div class="o_uni_grade_label">
+                                        <t t-if="record.score.raw_value >= 9">Distinction</t>
+                                        <t t-elif="record.score.raw_value >= 5">Pass</t>
+                                        <t t-else="">Fail</t>
+                                    </div>
+                                </div>
+                                <!-- Enrollment code: monospace via SCSS class, no inline style -->
+                                <span class="o_uni_subject_code">
+                                    <field name="enrollment_id"/>
+                                </span>
                             </div>
-                        </footer>
+                            <!-- Student footer -->
+                            <footer class="d-flex align-items-center gap-2 text-muted small mt-2 pt-2 border-top">
+                                <i class="fa fa-user"/>
+                                <field name="student_id"/>
+                            </footer>
+                        </div>
                     </t>
                 </templates>
             </kanban>

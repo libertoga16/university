@@ -8,23 +8,27 @@
             <form>
                 <sheet>
                     <div class="oe_button_box" name="button_box">
-                         <button name="%(action_university_enrollment)d" type="action" class="oe_stat_button" icon="fa-pencil-square-o" context="{'default_subject_id': id, 'search_default_subject_id': id}">
+                         <button name="%(university.action_university_enrollment)d" type="action" class="oe_stat_button" icon="fa-pencil-square-o" context="{'default_subject_id': id, 'search_default_subject_id': id}">
                             <field name="enrollment_count" widget="statinfo" string="Enrollments"/>
                         </button>
                     </div>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Subject Name"/></h1>
+                    </div>
                     <group>
                         <group name="main_info">
-                            <field name="name"/>
                             <field name="code"/>
                         </group>
                         <group name="org_info">
                             <field name="department_id"/>
-                            <field name="university_id"/>
+                            <field name="university_id" readonly="1"/>
                         </group>
                     </group>
                     <notebook>
                         <page string="Professors" name="professors">
-                            <field name="professor_ids" domain="[('university_id', '=', university_id)]"/>
+                            <field name="professor_ids"
+                                   domain="[('university_id', '=', university_id)]"
+                                   readonly="not department_id"/>
                         </page>
                     </notebook>
                 </sheet>
@@ -51,19 +55,35 @@
         <field name="name">university.subject.view.kanban</field>
         <field name="model">university.subject</field>
         <field name="arch" type="xml">
-            <kanban>
+            <kanban class="o_uni_kanban" sample="1">
                 <field name="name"/>
+                <field name="code"/>
                 <field name="university_id"/>
                 <templates>
                     <t t-name="card">
-                        <div class="d-flex mb-2" style="justify-content: space-between;">
-                            <field name="name" class="fw-bolder fs-5"/>
-                        </div>
-                        <footer>
-                            <div class="d-flex text-muted">
-                                <field name="university_id"/>
+                        <div class="o_uni_subject_card">
+                            <!-- Icon + code + name row -->
+                            <div class="d-flex align-items-start gap-3 mb-3">
+                                <div class="o_uni_subject_icon">
+                                    <i class="fa fa-book" title="Subject"/>
+                                </div>
+                                <div class="flex-grow-1 overflow-hidden">
+                                    <div class="o_uni_subject_name text-truncate">
+                                        <field name="name"/>
+                                    </div>
+                                    <span class="o_uni_subject_code mt-1">
+                                        <field name="code"/>
+                                    </span>
+                                </div>
                             </div>
-                        </footer>
+                            <!-- Footer: university -->
+                            <footer class="d-flex align-items-center gap-2 text-truncate pt-2 border-top">
+                                <i class="fa fa-university text-muted small"/>
+                                <span class="text-muted small text-truncate">
+                                    <field name="university_id"/>
+                                </span>
+                            </footer>
+                        </div>
                     </t>
                 </templates>
             </kanban>

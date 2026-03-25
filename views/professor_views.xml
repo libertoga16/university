@@ -7,30 +7,36 @@
         <field name="arch" type="xml">
             <form>
                 <sheet>
-                    <!-- Header: Avatar y Botones Estadísticos -->
+                    <!-- Avatar image editable from top-right -->
                     <field name="image_1920" widget="image" class="oe_avatar" options="{'preview_image': 'image_128'}"/>
                     <div class="oe_button_box" name="button_box">
-                         <button name="%(action_university_enrollment)d" type="action" class="oe_stat_button" icon="fa-pencil-square-o" context="{'default_professor_id': id, 'search_default_professor_id': id}">
+                        <button name="%(university.action_university_enrollment)d" type="action" class="oe_stat_button" icon="fa-pencil-square-o" context="{'default_professor_id': id, 'search_default_professor_id': id}">
                             <field name="enrollment_count" widget="statinfo" string="Enrollments"/>
                         </button>
                     </div>
-                    
-                    <!-- Información Principal -->
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Professor Name"/></h1>
+                    </div>
+                    <!-- Main academic and contact information -->
                     <group>
                         <group name="main_info">
-                            <field name="name"/>
                             <field name="email" widget="email"/>
                             <field name="university_id"/>
                         </group>
                         <group name="deps">
-                            <field name="department_id" domain="[('university_id', '=', university_id)]"/>
+                            <field name="department_id"
+                                  domain="[('university_id', '=', university_id)]"
+                                  readonly="not university_id"/>
                         </group>
                     </group>
-                    
-                    <!-- Notebook: Relaciones y Detalles Extra -->
+
+                    <!-- Subject assignments and additional details -->
                     <notebook>
                         <page string="Subjects" name="subjects">
-                            <field name="subject_ids" domain="[('university_id', '=', university_id)]"/>
+                            <field name="subject_ids"
+                                   domain="[('university_id', '=', university_id)]"
+                                   context="{'default_department_id': department_id, 'default_university_id': university_id}"
+                                   readonly="not university_id"/>
                         </page>
                     </notebook>
                 </sheet>
@@ -56,19 +62,28 @@
         <field name="name">university.professor.view.kanban</field>
         <field name="model">university.professor</field>
         <field name="arch" type="xml">
-            <kanban>
+            <kanban class="o_uni_kanban" sample="1">
                 <field name="id"/>
                 <field name="image_128"/>
+                <field name="department_id"/>
                 <templates>
                     <t t-name="card">
-                        <!-- Kanban Card Content -->
-                        <div class="d-flex align-items-center">
-                            <div class="me-3">
-                                <field name="image_128" widget="image" class="o_image_64_max rounded shadow-sm"/>
+                        <div class="o_uni_person_card">
+                            <!-- Circular avatar with user-fa fallback -->
+                            <div class="o_uni_avatar_wrapper">
+                                <img t-if="record.image_128.raw_value"
+                                     t-attf-src="/web/image/university.professor/#{record.id.raw_value}/image_128"
+                                     alt="Professor"/>
+                                <div t-else="" class="o_uni_avatar_placeholder">
+                                    <i class="fa fa-user" title="Professor"/>
+                                </div>
                             </div>
-                            <div class="d-flex flex-column">
-                                <field name="name" class="fw-bolder fs-5"/>
-                                <span class="text-muted"><field name="department_id"/></span>
+                            <!-- Name and department -->
+                            <div class="o_uni_person_name">
+                                <field name="name"/>
+                            </div>
+                            <div t-if="record.department_id.raw_value" class="o_uni_person_sub">
+                                <field name="department_id"/>
                             </div>
                         </div>
                     </t>

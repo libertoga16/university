@@ -66,13 +66,7 @@
               action="action_university_grade"
               sequence="20"/>
               
-    <menuitem id="university_menu_enrollment_wizard"
-              name="Batch Enrollment"
-              parent="university_menu_operations"
-              action="action_university_enrollment_wizard"
-              sequence="30"/>
-              
-    <!-- REPORTS CATEGORY -->
+    <!-- INFORMES CATEGORY -->
     <menuitem id="university_menu_reports"
               name="Reports"
               parent="university_menu_root"
